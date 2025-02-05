@@ -1,74 +1,107 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, View, Text, Dimensions } from "react-native";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const FirstView = () => {
+  const { width } = Dimensions.get("window");
 
-export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#ff9800', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/gyool.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={{ color: '#82BD4D' }}>🍊귤 톡 gyool talk🍊</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">🍊step 1 !!!🍊</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ThemedView
+      style={{
+        backgroundColor: "#DCD7CB",
+        paddingLeft: "5%",
+        paddingRight: "5%",
+        height: "100%",
+      }}
+    >
+      <FriendsListAppBar />
+      <ListItem id={"내 아이디"} />
+      <View style={{ height: width * 0.063 }} />
+      <View style={{ borderBottomWidth: 1, borderBottomColor: "#e4e4e4" }} />
+      <View style={{ marginTop: width * 0.034 }}>
+        <Text style={{ fontSize: width * 0.03, marginBottom: width * 0.013 }}>
+          친구 7
+        </Text>
+      </View>
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
+    </ThemedView>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 300,
-    width: 290,
-    bottom: -74,
-    left: 0,
-    position: 'absolute',
-  },
-});
+const ListItem = ({ id }: { id: string }) => {
+  const { width } = Dimensions.get("window");
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: width * 0.022,
+      }}
+    >
+      <Image
+        style={{ width: width * 0.1, height: width * 0.109 }}
+        source={require("@/assets/images/icon/friends-list-profile.png")}
+      />
+      <Text style={{ fontSize: width * 0.036, fontWeight: "500" }}>{id}</Text>
+    </View>
+  );
+};
+
+const FriendsListAppBar = () => {
+  const { width } = Dimensions.get("window");
+
+  return (
+    <View
+      style={{
+        paddingTop: "20%",
+        paddingBottom: "11%",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <Text style={{ fontSize: width * 0.072, fontWeight: "600" }}>친구</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: width * 0.022,
+        }}
+      >
+        <Image
+          style={{
+            width: width * 0.072,
+            height: width * 0.072,
+            resizeMode: "contain",
+          }}
+          source={require("@/assets/images/icon/search-icon.png")}
+        />
+        <Image
+          style={{
+            width: width * 0.072,
+            height: width * 0.072,
+            resizeMode: "contain",
+          }}
+          source={require("@/assets/images/icon/add-friend-icon.png")}
+        />
+      </View>
+    </View>
+  );
+};
+
+export default FirstView;
