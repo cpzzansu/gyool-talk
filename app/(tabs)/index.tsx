@@ -1,7 +1,18 @@
 import { Image, View, Text, Dimensions } from "react-native";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import TabsScreenAppBar from "@/components/TabsScreenAppBar";
+
+const data = {
+  nickname: "내 아이디",
+  friendsList: [
+    { nickname: "친구아이디1" },
+    { nickname: "친구아이디2" },
+    { nickname: "친구아이디3" },
+    { nickname: "친구아이디4" },
+    { nickname: "친구아이디5" },
+    { nickname: "친구아이디6" },
+  ],
+};
 
 const FirstView = () => {
   const { width } = Dimensions.get("window");
@@ -15,42 +26,50 @@ const FirstView = () => {
         height: "100%",
       }}
     >
-      <FriendsListAppBar />
-      <ListItem id={"내 아이디"} />
-      <View style={{ height: width * 0.063 }} />
+      {/*Tabs Screen App Bar*/}
+      <TabsScreenAppBar
+        title={"친구"}
+        icons={[
+          { src: require("@/assets/images/icon/search-icon.png") },
+          { src: require("@/assets/images/icon/add-friend-icon.png") },
+        ]}
+      />
+
+      {/*내 프로필 아이템*/}
+      <ListItem id={data.nickname} marginBottom={0.063} />
+
+      {/*구분선*/}
       <View style={{ borderBottomWidth: 1, borderBottomColor: "#e4e4e4" }} />
+
+      {/*친구 수*/}
       <View style={{ marginTop: width * 0.034 }}>
-        <Text style={{ fontSize: width * 0.03, marginBottom: width * 0.013 }}>
-          친구 7
+        <Text
+          style={{
+            fontSize: width * 0.03,
+            marginBottom: width * 0.013,
+            fontFamily: "pretendardMedium",
+          }}
+        >
+          친구 {data.friendsList.length}
         </Text>
       </View>
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
-      <ListItem id={"친구아이디"} />
-      <View style={{ height: width * 0.05 }} />
+
+      {/*친구 목록*/}
+      {data.friendsList.map((friend) => (
+        <ListItem id={friend.nickname} marginBottom={0.05} />
+      ))}
     </ThemedView>
   );
 };
 
-const ListItem = ({ id }: { id: string }) => {
+// 친구 목록 아이템 컴포넌트
+const ListItem = ({
+  id,
+  marginBottom,
+}: {
+  id: string;
+  marginBottom: number;
+}) => {
   const { width } = Dimensions.get("window");
 
   return (
@@ -59,55 +78,16 @@ const ListItem = ({ id }: { id: string }) => {
         flexDirection: "row",
         alignItems: "center",
         gap: width * 0.022,
+        marginBottom: width * marginBottom,
       }}
     >
       <Image
         style={{ width: width * 0.1, height: width * 0.109 }}
         source={require("@/assets/images/icon/friends-list-profile.png")}
       />
-      <Text style={{ fontSize: width * 0.036, fontWeight: "500" }}>{id}</Text>
-    </View>
-  );
-};
-
-const FriendsListAppBar = () => {
-  const { width } = Dimensions.get("window");
-
-  return (
-    <View
-      style={{
-        paddingTop: "20%",
-        paddingBottom: "11%",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-    >
-      <Text style={{ fontSize: width * 0.072, fontWeight: "600" }}>친구</Text>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: width * 0.022,
-        }}
-      >
-        <Image
-          style={{
-            width: width * 0.072,
-            height: width * 0.072,
-            resizeMode: "contain",
-          }}
-          source={require("@/assets/images/icon/search-icon.png")}
-        />
-        <Image
-          style={{
-            width: width * 0.072,
-            height: width * 0.072,
-            resizeMode: "contain",
-          }}
-          source={require("@/assets/images/icon/add-friend-icon.png")}
-        />
-      </View>
+      <Text style={{ fontSize: width * 0.036, fontFamily: "pretendardMedium" }}>
+        {id}
+      </Text>
     </View>
   );
 };

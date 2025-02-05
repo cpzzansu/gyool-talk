@@ -22,7 +22,9 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    pretendard: require("@/assets/fonts/PretendardVariable.ttf"),
+    pretendardMedium: require("@/assets/fonts/Pretendard-Medium.ttf"),
+    pretendardSemibold: require("@/assets/fonts/Pretendard-SemiBold.ttf"),
   });
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export default function RootLayout() {
       // )
     };
   };
+
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
