@@ -49,7 +49,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-          name="explore"
+          name="ChattingList"
           options={{
             title: '채팅',
             tabBarIcon: ({ color }) => <Image
@@ -60,7 +60,7 @@ export default function TabLayout() {
           }}
       />
       <Tabs.Screen
-          name="search_screen"
+          name="SearchScreen"
           options={{
             title: '검색',
             tabBarIcon: ({ color }) => <Image
@@ -71,7 +71,7 @@ export default function TabLayout() {
           }}
       />
       <Tabs.Screen
-          name="setting_page"
+          name="SettingPage"
           options={{
             title: '설정',
             tabBarIcon: ({ color }) => <Image
