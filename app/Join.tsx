@@ -9,12 +9,6 @@ export default function LoginScreen() {
     const [username, setUsername] = useState(""); // 아이디 상태 관리
     const [password, setPassword] = useState(""); // 비밀번호 상태 관리
 
-    // const handleLogin = () => {
-    //     router.replace("/(tabs)"); // 로그인 후 탭 네비게이션으로 이동
-    // };
-    // const handleGoBack = () => {
-    //     router.replace("/Login");  // 이전 화면으로 이동
-    // };
 
     const handlePress = () => {
         Alert.alert('이미지 버튼 클릭됨');
@@ -24,19 +18,26 @@ export default function LoginScreen() {
     return (
         <>
             <ThemedView style={styles.container}>
-                {/* 로고 */}
-                <Image source={require("@/assets/images/gyoolTalk.png")} style={styles.logo} />
-                <ThemedText type="title" style={{fontSize: 24, marginBottom: 40}}>톡</ThemedText>
+                <View style={{width: '100%'}}>
+                    <ThemedText type="title" style={{fontSize: 24, marginBottom: 40 ,width :'38%'}}>기본 정보를 입력하세요.</ThemedText>
+                </View>
+
 
                 {/* 아이디 입력창 */}
-                <TextInput
-                    style={styles.input}
-                    placeholder="아이디"
-                    value={username}
-                    onChangeText={setUsername}
-                    placeholderTextColor="#827F7F"
-                />
-
+                <View style={styles.twoBlock}>
+                    <TextInput
+                        style={styles.id}
+                        placeholder="아이디"
+                        value={username}
+                        onChangeText={setUsername}
+                        placeholderTextColor="#827F7F"
+                    />
+                    <TouchableOpacity style={styles.checkBtn}
+                        //onPress={handleLogin}
+                    >
+                        <ThemedText style={styles.checkText}>확인</ThemedText>
+                    </TouchableOpacity>
+                </View>
                 {/* 비밀번호 입력창 */}
                 <TextInput
                     style={styles.input}
@@ -46,26 +47,53 @@ export default function LoginScreen() {
                     onChangeText={setPassword}
                     placeholderTextColor="#827F7F"
                 />
+                <TextInput
+                    style={styles.input}
+                    placeholder="비밀번호 확인"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholderTextColor="#827F7F"
+                />
 
-                {/* 로그인 버튼 */}
-                <TouchableOpacity style={styles.loginButton}
-                    //onPress={handleLogin}
-                >
-                    <ThemedText style={styles.loginButtonText}>로그인</ThemedText>
-                </TouchableOpacity>
-
-                <View style={styles.orContainer}>
-                    <View style={styles.line} />
-                    <Text style={styles.orText}>OR</Text>
-                    <View style={styles.line} />
+                {/* 이메일 입력창 */}
+                <View style={styles.twoBlock}>
+                    <TextInput
+                        style={styles.id}
+                        placeholder="이메일"
+                        value={username}
+                        onChangeText={setUsername}
+                        placeholderTextColor="#827F7F"
+                    />
+                    <TouchableOpacity style={styles.checkBtn}
+                        //onPress={handleLogin}
+                    >
+                        <ThemedText style={styles.checkText}>인증</ThemedText>
+                    </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity onPress={handlePress}>
-                    <Image
-                        source={require("@/assets/images/naver_login.png")}  // 이미지 경로
-                        style={styles.loginImage}
+                {/* 인증번호 입력창 */}
+                <View style={styles.twoBlock}>
+                    <TextInput
+                        style={styles.id}
+                        placeholder="인증번호"
+                        value={username}
+                        onChangeText={setUsername}
+                        placeholderTextColor="#827F7F"
                     />
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.checkBtn}
+                        //onPress={handleLogin}
+                    >
+                        <ThemedText style={styles.checkText}>확인</ThemedText>
+                    </TouchableOpacity>
+                </View>
+                {/* 로그인 버튼 */}
+                {/*<TouchableOpacity style={styles.loginButton}*/}
+                {/*    //onPress={handleLogin}*/}
+                {/*>*/}
+                {/*    <ThemedText style={styles.loginButtonText}>로그인</ThemedText>*/}
+                {/*</TouchableOpacity>*/}
+
             </ThemedView>
         </>
     );
@@ -81,6 +109,12 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#DCD7CB',
     },
+    twoBlock :{
+      width : '100%',
+      display : 'flex',
+      flexDirection : 'row',
+      justifyContent : 'center'
+    },
     logo: {
         marginTop: 110,
         width: 44,
@@ -91,23 +125,32 @@ const styles = StyleSheet.create({
         fontSize: 24,
         marginBottom: 10
     },
-    input: {
-        width: "98%",
+    id: {
+        width: "80.8%",
         height: 46,
         borderRadius: 3,
         paddingHorizontal: 10,
         backgroundColor: "#EFEFEF",
         marginBottom: 15,
     },
-    loginButton: {
-        width: "98%",
+    input: {
+        width: "100%",
+        height: 46,
+        borderRadius: 3,
+        paddingHorizontal: 10,
+        backgroundColor: "#EFEFEF",
+        marginBottom: 15,
+    },
+    checkBtn: {
+        width: "17.2%",
         height: 45,
+        marginLeft: '14px',
         backgroundColor: "#EF7417",
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 3,
     },
-    loginButtonText: {
+    checkText: {
         color: "#F1F1F1",
         fontSize: 20,
         fontWeight: "bold",
