@@ -38,6 +38,14 @@ const FirstView = () => {
       <View style={{ height: width * 0.05 }} />
       <ListItem id={"친구아이디"} />
       <View style={{ height: width * 0.05 }} />
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
+      <ListItem id={"친구아이디"} />
+      <View style={{ height: width * 0.05 }} />
     </ThemedView>
   );
 };
