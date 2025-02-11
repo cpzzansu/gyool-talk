@@ -20,25 +20,36 @@ export default function LoginScreen() {
   const { width, height } = Dimensions.get("window");
   const [authSent, setAuthSent] = useState(false); // ✅ 인증번호 발송 여부
   const [authConfirm, setAuthConfirm] = useState(false); // ✅ 인증번호 확인 여부
+  const [foundId, setFoundId] = useState(""); // 찾은 아이디
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
       alignItems: "center",
       //justifyContent: 'center',
-      padding: 20,
+      padding: width * 0.05,
       backgroundColor: "#DCD7CB",
     },
+    textContainer: {
+      marginTop: height * 0.05,
+      marginVertical: height * 0.03,
+      width: "100%",
+      justifyContent: "center",
+      fontSize: width * 0.03,
+    },
+    infoText: {
+      fontSize: width * 0.03,
+      color: "#727272",
+    },
     input: {
-      flex: 1, // 남은 공간을 최대한 차지
-      width: width * 0.9, // ✅ width, height를 여기서 사용
+      width: width * 0.9,
       height: height * 0.05,
       borderRadius: 3,
-      paddingHorizontal: 10,
+      paddingHorizontal: width * 0.03,
       backgroundColor: "#EFEFEF",
     },
     authButton: {
-      width: width * 0.15, // 버튼 크기 지정
+      width: width * 0.15,
       height: height * 0.05,
       backgroundColor: "#EF7417",
       alignItems: "center",
@@ -47,7 +58,7 @@ export default function LoginScreen() {
     },
     authButtonText: {
       color: "#F1F1F1",
-      fontSize: 18,
+      fontSize: width * 0.04,
     },
     findButton: {
       width: "100%",
@@ -57,40 +68,43 @@ export default function LoginScreen() {
       justifyContent: "center",
       borderRadius: 3,
     },
-    textContainer: {
-      marginTop: 50,
-      marginVertical: 20,
-      width: "100%",
-      justifyContent: "center",
-      fontSize: 10,
-    },
-    infoText: {
-      marginHorizontal: 10,
-      fontSize: 13,
-      color: "#727272",
-    },
     rowContainer: {
       flexDirection: "row",
-      justifyContent: "space-between", // 요소 사이에 공간을 균등 배치
+      justifyContent: "space-between",
       alignItems: "center",
-      width: "100%", // 전체 너비를 차지하도록 설정
-      marginBottom: authSent ? 2 : 18,
+      width: "100%",
+      marginBottom: authSent ? height * 0.005 : height * 0.015,
       gap: 5,
     },
     rowContainer2: {
       flexDirection: "row",
-      justifyContent: "space-between", // 요소 사이에 공간을 균등 배치
+      justifyContent: "space-between",
       alignItems: "center",
-      width: "100%", // 전체 너비를 차지하도록 설정
-      marginBottom: authConfirm ? 2 : 18,
+      width: "100%",
+      marginBottom: authConfirm ? height * 0.005 : height * 0.015,
       gap: 5,
     },
     authMessage: {
       width: "100%",
       justifyContent: "center",
-      fontSize: 10,
-      marginBottom: 2,
-      color: "#2E970B", // 파란색으로 강조
+      fontSize: width * 0.025,
+      marginBottom: height * 0.005,
+      color: "#2E970B",
+    },
+    checkImage: {
+      width: width * 0.11,
+      height: height * 0.04,
+      resizeMode: "contain", // 원본 비율 유지
+    },
+    idContainer: {
+      alignItems: "center",
+      marginTop: height * 0.05,
+      gap: 10,
+    },
+    foundIdText: {
+      textAlign: "center",
+      fontSize: width * 0.04,
+      color: "#727272",
     },
   });
 
@@ -105,6 +119,8 @@ export default function LoginScreen() {
   };
   const findId = () => {
     console.log("아이디 찾기");
+    const foundId = "test";
+    setFoundId(foundId);
   };
 
   return (
@@ -157,6 +173,18 @@ export default function LoginScreen() {
         <TouchableOpacity style={styles.findButton} onPress={findId}>
           <ThemedText style={styles.authButtonText}>아이디 찾기</ThemedText>
         </TouchableOpacity>
+
+        {foundId && (
+          <View style={styles.idContainer}>
+            <Image
+              source={require("@/assets/images/check.png")}
+              style={styles.checkImage}
+            />
+            <Text style={styles.foundIdText}>
+              아이디는{"\n"}'{foundId}'입니다.
+            </Text>
+          </View>
+        )}
       </ThemedView>
     </>
   );
