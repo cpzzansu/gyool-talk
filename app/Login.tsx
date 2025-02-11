@@ -7,6 +7,7 @@ import {
   Text,
   Alert,
   Platform,
+  Dimensions,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -18,6 +19,7 @@ export default function LoginScreen() {
   const [userId, setUserId] = useState(""); // 아이디 상태 관리
   const [password, setPassword] = useState(""); // 비밀번호 상태 관리
   const navigation = useNavigation(); // navigation 객체
+  const { width, height } = Dimensions.get("window");
 
   const showAlert = (title: string, message: string) => {
     if (Platform.OS === "web") {
@@ -66,6 +68,83 @@ export default function LoginScreen() {
   const join = () => {
     navigation.navigate("Join");
   };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: "center",
+      padding: 20,
+      backgroundColor: "#DCD7CB",
+    },
+    logo: {
+      marginTop: 110,
+      width: width * 0.13, // 화면 너비의 30%로 설정
+      height: width * 0.13 * (12 / 11), // 가로:세로 비율이 11:12
+      marginBottom: 10,
+    },
+    input: {
+      width: width * 0.9, // ✅ width, height를 여기서 사용
+      height: height * 0.05,
+      borderRadius: 3,
+      paddingHorizontal: 10,
+      backgroundColor: "#EFEFEF",
+      marginBottom: 15,
+    },
+    loginButton: {
+      width: width * 0.9,
+      height: height * 0.05,
+      backgroundColor: "#EF7417",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 3,
+    },
+    loginButtonText: {
+      color: "#F1F1F1",
+      fontSize: 18,
+    },
+    orContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginVertical: 20,
+      width: "100%",
+      justifyContent: "center",
+    },
+    line: {
+      height: 0.8,
+      flex: 1,
+      backgroundColor: "#B1B1B1",
+    },
+    orText: {
+      marginHorizontal: 10,
+      fontSize: 16,
+      color: "#414040",
+    },
+    loginImage: {
+      width: width * 0.44,
+      height: height * 0.04,
+      borderRadius: 6,
+      borderColor: "#858886",
+      borderWidth: 0.5,
+    },
+    rowContainer: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "center",
+      marginTop: 5,
+      gap: 5,
+    },
+    textRow: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 20,
+    },
+    textButton: {
+      fontSize: 14,
+      color: "#414040",
+      marginHorizontal: 3,
+    },
+  });
 
   return (
     <ThemedView style={styles.container}>
@@ -141,80 +220,3 @@ export default function LoginScreen() {
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: "#DCD7CB",
-  },
-  logo: {
-    marginTop: 110,
-    width: 44,
-    height: 48,
-    marginBottom: 10,
-  },
-  input: {
-    width: "98%",
-    height: 46,
-    borderRadius: 3,
-    paddingHorizontal: 10,
-    backgroundColor: "#EFEFEF",
-    marginBottom: 15,
-  },
-  loginButton: {
-    width: "98%",
-    height: 45,
-    backgroundColor: "#EF7417",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 3,
-  },
-  loginButtonText: {
-    color: "#F1F1F1",
-    fontSize: 18,
-  },
-  orContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 20,
-    width: "100%",
-    justifyContent: "center",
-  },
-  line: {
-    height: 0.8,
-    flex: 1,
-    backgroundColor: "#B1B1B1",
-  },
-  orText: {
-    marginHorizontal: 10,
-    fontSize: 16,
-    color: "#414040",
-  },
-  loginImage: {
-    width: 190,
-    height: 41,
-    borderRadius: 6,
-    borderColor: "#858886",
-    borderWidth: 0.5,
-  },
-  rowContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    marginTop: 5,
-    gap: 5,
-  },
-  textRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  textButton: {
-    fontSize: 14,
-    color: "#414040",
-    marginHorizontal: 3,
-  },
-});
