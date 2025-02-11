@@ -9,11 +9,12 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
-import store from "../redux/store.js";
+import store, { persistor } from "../redux/store";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { StyleSheet } from "react-native";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -55,20 +56,21 @@ export default function RootLayout() {
 
   return (
     <Provider store={store}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
+      <PersistGate loading={false} persistor={persistor}>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="Login" options={screenOptions("로그인")} />
           <Stack.Screen name="Join" options={screenOptions("회원가입")} />
           <Stack.Screen name="FindId" options={screenOptions("아이디 찾기")} />
-          <Stack.Screen
-            name="ResetPw"
-            options={screenOptions("비밀번호 재설정")}
-          />
+          <Stack.Screen name="ResetPw" options={screenOptions("비밀번호 재설정")} />
           <Stack.Screen name="+not-found" />
         </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </PersistGate>
     </Provider>
   );
 }
