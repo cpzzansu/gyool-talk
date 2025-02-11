@@ -73,22 +73,23 @@ export default function LoginScreen() {
     container: {
       flex: 1,
       alignItems: "center",
-      padding: 20,
+      padding: width * 0.05,
       backgroundColor: "#DCD7CB",
     },
     logo: {
-      marginTop: 110,
-      width: width * 0.13, // 화면 너비의 30%로 설정
-      height: width * 0.13 * (12 / 11), // 가로:세로 비율이 11:12
-      marginBottom: 10,
+      marginTop: height * 0.1,
+      width: width * 0.1,
+      height: width * 0.1,
+      marginBottom: height * 0.01,
+      resizeMode: "contain", // 원본 비율 유지
     },
     input: {
       width: width * 0.9, // ✅ width, height를 여기서 사용
       height: height * 0.05,
       borderRadius: 3,
-      paddingHorizontal: 10,
+      paddingHorizontal: width * 0.03,
       backgroundColor: "#EFEFEF",
-      marginBottom: 15,
+      marginBottom: height * 0.015,
     },
     loginButton: {
       width: width * 0.9,
@@ -100,12 +101,12 @@ export default function LoginScreen() {
     },
     loginButtonText: {
       color: "#F1F1F1",
-      fontSize: 18,
+      fontSize: width * 0.04,
     },
     orContainer: {
       flexDirection: "row",
       alignItems: "center",
-      marginVertical: 20,
+      marginVertical: height * 0.03,
       width: "100%",
       justifyContent: "center",
     },
@@ -115,8 +116,8 @@ export default function LoginScreen() {
       backgroundColor: "#B1B1B1",
     },
     orText: {
-      marginHorizontal: 10,
-      fontSize: 16,
+      marginHorizontal: width * 0.02,
+      fontSize: width * 0.04,
       color: "#414040",
     },
     loginImage: {
@@ -130,19 +131,19 @@ export default function LoginScreen() {
       flexDirection: "row",
       justifyContent: "space-around",
       alignItems: "center",
-      marginTop: 5,
+      marginTop: height * 0.01,
       gap: 5,
     },
     textRow: {
       flexDirection: "row",
       justifyContent: "center",
       alignItems: "center",
-      marginTop: 20,
+      marginTop: height * 0.04,
     },
     textButton: {
-      fontSize: 14,
+      fontSize: width * 0.03,
       color: "#414040",
-      marginHorizontal: 3,
+      marginHorizontal: width * 0.01,
     },
   });
 
