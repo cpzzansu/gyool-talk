@@ -7,11 +7,13 @@ import {
   Text,
   Alert,
   Dimensions,
+  Platform,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useState } from "react";
+import * as common from "@/utils/common";
 
 export default function LoginScreen() {
   const router = useRouter(); // 페이지 이동을 위한 useRouter 사용
@@ -108,9 +110,44 @@ export default function LoginScreen() {
     },
   });
 
-  const emailConfirm = () => {
-    console.log("이메일 인증 체크");
-    setAuthSent(true); // ✅ 인증번호 발송 상태 업데이트
+  const showAlert = (message: string) => {
+    if (Platform.OS === "web") {
+      window.alert(message);
+    } else {
+      Alert.alert(message);
+    }
+  };
+
+  const emailConfirm = async () => {
+    if (!userEmail) {
+      showAlert("이메일을 입력해주세요.");
+      return;
+    }
+    if (!common.isValidEmail(userEmail)) {
+      showAlert("올바른 이메일 형식을 입력해주세요.");
+      return;
+    }
+    try {
+      const response = await fetch("http://localhost:8080/user/confirmEmail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: userEmail }),
+      });
+
+      const result = await response.json();
+
+      if (result) {
+        setAuthSent(true); // 인증번호 발송 상태 업데이트
+        showAlert("인증번호가 발송되었습니다.");
+      } else {
+        showAlert("이메일 인증 요청 실패. 다시 시도해주세요.");
+      }
+    } catch (error) {
+      console.error("이메일 인증 요청 오류:", error);
+      showAlert("서버 오류가 발생했습니다.");
+    }
   };
 
   const cofirmNumCheck = () => {
@@ -127,9 +164,9 @@ export default function LoginScreen() {
     <>
       <ThemedView style={styles.container}>
         <View style={styles.textContainer}>
-          <Text style={styles.infoText}>
+          <ThemedText style={styles.infoText}>
             아이디를 잊으셨나요?{"\n"}아래의 정보를 입력해주세요.
-          </Text>
+          </ThemedText>
         </View>
 
         <View style={styles.rowContainer}>
@@ -148,7 +185,9 @@ export default function LoginScreen() {
 
         {/* ✅ 인증번호 발송 메시지 */}
         {authSent && (
-          <Text style={styles.authMessage}>인증번호가 발송되었습니다.</Text>
+          <View>
+            <Text style={styles.authMessage}>인증번호가 발송되었습니다.</Text>
+          </View>
         )}
 
         {/* 인증번호 입력창 */}
@@ -167,7 +206,11 @@ export default function LoginScreen() {
         </View>
 
         {/* ✅ 인증번호 발송 메시지 */}
-        {authConfirm && <Text style={styles.authMessage}>인증되었습니다.</Text>}
+        {authConfirm && (
+          <View>
+            <Text style={styles.authMessage}>인증되었습니다.</Text>
+          </View>
+        )}
 
         {/* 아이디찾기 버튼 */}
         <TouchableOpacity style={styles.findButton} onPress={findId}>
@@ -180,9 +223,9 @@ export default function LoginScreen() {
               source={require("@/assets/images/check.png")}
               style={styles.checkImage}
             />
-            <Text style={styles.foundIdText}>
+            <ThemedText style={styles.foundIdText}>
               아이디는{"\n"}'{foundId}'입니다.
-            </Text>
+            </ThemedText>
           </View>
         )}
       </ThemedView>
