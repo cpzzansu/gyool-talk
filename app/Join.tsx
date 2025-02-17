@@ -34,10 +34,11 @@ export default function LoginScreen() {
       Alert.alert(title, message);
     }
   };
+
+  // 아이디 중복 체크
   const idCheck = () => {
-    console.log("아이디 중복체크");
     if (userId.trim() == "") {
-      showAlert("아이디 입력", "아이디를 입력해주세요.");
+      showAlert("회원가입", "아이디를 입력해주세요.");
       setIsDuplicate(null);
       return;
     }
@@ -46,10 +47,10 @@ export default function LoginScreen() {
       .then(function (resp: any) {
         console.log(resp.data);
         if (resp.data) {
-          setIsDuplicate(false);
-        } else {
           setIsDuplicate(true);
           setUserId("");
+        } else {
+          setIsDuplicate(false);
         }
       })
       .catch(function (err: any) {
@@ -57,29 +58,32 @@ export default function LoginScreen() {
       });
   };
 
+  //이메일 확인
   const emailConfirm = () => {
     if (!email.includes("@")) {
-      showAlert("이메일 확인", "이메일 주소가 유효하지 않습니다.");
+      showAlert("회원가입", "이메일 주소가 유효하지 않습니다.");
       return;
     }
     axios
-      .post("http://localhost:8080/join/confirmEmail", { email: email })
+      .post("http://localhost:8080/api/user/confirmEmail", { email: email })
       .then(function (resp: any) {
         console.log(resp.data);
         if (resp.data) {
-          showAlert("인증번호 발송", "인증번호가 발송되었습니다.");
+          showAlert("회원가입", "인증번호가 발송되었습니다.");
           setIsConfirm(true);
         } else {
-          showAlert("인증번호 발송 실패", "잠시후 다시 시도 해주세요.");
+          showAlert("회원가입", "잠시후 다시 시도 해주세요.");
         }
       })
       .catch(function (err: any) {
         console.log(`Error Message: ${err}`);
       });
   };
+
+  //인증번호 확인 todo)) 로직 연결
   const cofirmNumCheck = () => {
     if (!isConfirm) {
-      showAlert("인증번호 확인", "이메일 인증버튼을 눌러주세요");
+      showAlert("회원가입", "이메일 인증버튼을 눌러주세요");
       retrun;
     }
     console.log("인증번호 확인 체크");
@@ -100,6 +104,7 @@ export default function LoginScreen() {
         console.log(`Error Message: ${err}`);
       });
   };
+  //회원가입
   const join = () => {
     let header = "회원가입";
     let message = "완료되었습니다.";
@@ -122,16 +127,15 @@ export default function LoginScreen() {
     } else {
       axios
         .post("http://localhost:8080/join/joinUser", {
-          id: userId,
-          password: password,
-          email: email,
-          nickname: nickname,
+          userId: userId,
+          userPassword: password,
+          userEmail: email,
+          userNickName: nickname,
         })
         .then(function (resp: any) {
-          console.log(resp.data, "chk");
           if (resp.data) {
-            console.log("???");
-
+            console.log("회원가입 완료");
+            navigation.navigate("Login");
             //라우팅 로그인 페이지
           } else {
             message = "잠시 후 다시 시도해주세요";
