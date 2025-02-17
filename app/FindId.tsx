@@ -22,7 +22,7 @@ export default function LoginScreen() {
   const { width, height } = Dimensions.get("window");
   const [authSent, setAuthSent] = useState(false); // ✅ 인증번호 발송 여부
   const [authConfirm, setAuthConfirm] = useState(false); // ✅ 인증번호 확인 여부
-  const [foundId, setFoundId] = useState(""); // 찾은 아이디
+  const [foundId, setFoundId] = useState(false); // 찾은 아이디
 
   const styles = StyleSheet.create({
     container: {
@@ -33,8 +33,8 @@ export default function LoginScreen() {
       backgroundColor: "#DCD7CB",
     },
     textContainer: {
-      marginTop: height * 0.05,
-      marginVertical: height * 0.03,
+      marginTop: width * 0.1,
+      marginVertical: width * 0.06,
       width: "100%",
       justifyContent: "center",
       fontSize: width * 0.03,
@@ -45,14 +45,14 @@ export default function LoginScreen() {
     },
     input: {
       width: width * 0.9,
-      height: height * 0.05,
+      height: width * 0.1,
       borderRadius: 3,
       paddingHorizontal: width * 0.03,
       backgroundColor: "#EFEFEF",
     },
     authButton: {
       width: width * 0.15,
-      height: height * 0.05,
+      height: width * 0.1,
       backgroundColor: "#EF7417",
       alignItems: "center",
       justifyContent: "center",
@@ -64,7 +64,7 @@ export default function LoginScreen() {
     },
     findButton: {
       width: "100%",
-      height: height * 0.05,
+      height: width * 0.1,
       backgroundColor: "#EF7417",
       alignItems: "center",
       justifyContent: "center",
@@ -75,7 +75,7 @@ export default function LoginScreen() {
       justifyContent: "space-between",
       alignItems: "center",
       width: "100%",
-      marginBottom: authSent ? height * 0.005 : height * 0.015,
+      marginBottom: authSent ? width * 0.01 : width * 0.032,
       gap: 5,
     },
     rowContainer2: {
@@ -83,24 +83,24 @@ export default function LoginScreen() {
       justifyContent: "space-between",
       alignItems: "center",
       width: "100%",
-      marginBottom: authConfirm ? height * 0.005 : height * 0.015,
+      marginBottom: authConfirm ? width * 0.01 : width * 0.032,
       gap: 5,
     },
     authMessage: {
       width: "100%",
       justifyContent: "center",
       fontSize: width * 0.025,
-      marginBottom: height * 0.005,
+      marginBottom: width * 0.01,
       color: "#2E970B",
     },
     checkImage: {
       width: width * 0.11,
-      height: height * 0.04,
+      height: height * 0.086,
       resizeMode: "contain", // 원본 비율 유지
     },
     idContainer: {
       alignItems: "center",
-      marginTop: height * 0.05,
+      marginTop: width * 0.1,
       gap: 10,
     },
     foundIdText: {
@@ -136,28 +136,81 @@ export default function LoginScreen() {
         body: JSON.stringify({ email: userEmail }),
       });
 
-      const result = await response.json();
+      const result = await response.status;
 
-      if (result) {
+      if (result.valueOf() == 200) {
         setAuthSent(true); // 인증번호 발송 상태 업데이트
         showAlert("인증번호가 발송되었습니다.");
+      } else if (result.valueOf() == 404) {
+        showAlert("등록되지 않은 Email입니다. 다시 확인해주세요.");
+        setAuthSent(false);
+        setUserEmail("");
       } else {
         showAlert("이메일 인증 요청 실패. 다시 시도해주세요.");
+        setUserEmail("");
+        setAuthSent(false);
       }
     } catch (error) {
       console.error("이메일 인증 요청 오류:", error);
-      showAlert("서버 오류가 발생했습니다.");
+      showAlert("서버 오류가 발생했습니다. 관리자에게 문의하세요.");
     }
   };
 
-  const cofirmNumCheck = () => {
-    console.log("인증번호 확인 체크");
-    setAuthConfirm(true);
+  const cofirmNumCheck = async () => {
+    if (!confirmNum) {
+      showAlert("인증번호를 입력해주세요.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/user/checkAuthNum", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: userEmail, authNum: confirmNum }),
+      });
+
+      const result = await response.json();
+
+      if (result) {
+        setAuthConfirm(true); // 인증번호 발송 상태 업데이트
+      } else {
+        showAlert("인증번호가 올바르지 않습니다.");
+        setAuthConfirm(false);
+        setConfirmNum("");
+      }
+    } catch (error) {
+      console.error("이메일 인증 확인 오류:", error);
+      showAlert("서버 오류가 발생했습니다. 관리자에게 문의하세요.");
+    }
   };
-  const findId = () => {
-    console.log("아이디 찾기");
-    const foundId = "test";
-    setFoundId(foundId);
+
+  const findId = async () => {
+    if (authSent && authConfirm) {
+      try {
+        const response = await fetch("http://localhost:8080/user/findId", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: userEmail }),
+        });
+
+        const result = await response.json();
+
+        if (result.userId != null) {
+          setFoundId(result.userId);
+        } else {
+          showAlert("인증번호가 올바르지 않습니다.");
+          setAuthConfirm(false);
+          setConfirmNum("");
+        }
+      } catch (error) {
+        console.error("이메일 인증 확인 오류:", error);
+        showAlert("서버 오류가 발생했습니다. 관리자에게 문의하세요.");
+      }
+    }
   };
 
   return (
@@ -185,9 +238,7 @@ export default function LoginScreen() {
 
         {/* ✅ 인증번호 발송 메시지 */}
         {authSent && (
-          <View>
-            <Text style={styles.authMessage}>인증번호가 발송되었습니다.</Text>
-          </View>
+          <Text style={styles.authMessage}>인증번호가 발송되었습니다.</Text>
         )}
 
         {/* 인증번호 입력창 */}
@@ -195,7 +246,6 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             placeholder="인증번호"
-            secureTextEntry
             value={confirmNum}
             onChangeText={setConfirmNum}
             placeholderTextColor="#827F7F"
@@ -206,11 +256,7 @@ export default function LoginScreen() {
         </View>
 
         {/* ✅ 인증번호 발송 메시지 */}
-        {authConfirm && (
-          <View>
-            <Text style={styles.authMessage}>인증되었습니다.</Text>
-          </View>
-        )}
+        {authConfirm && <Text style={styles.authMessage}>인증되었습니다.</Text>}
 
         {/* 아이디찾기 버튼 */}
         <TouchableOpacity style={styles.findButton} onPress={findId}>
@@ -223,9 +269,9 @@ export default function LoginScreen() {
               source={require("@/assets/images/check.png")}
               style={styles.checkImage}
             />
-            <ThemedText style={styles.foundIdText}>
+            <Text style={styles.foundIdText}>
               아이디는{"\n"}'{foundId}'입니다.
-            </ThemedText>
+            </Text>
           </View>
         )}
       </ThemedView>

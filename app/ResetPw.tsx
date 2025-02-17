@@ -5,11 +5,14 @@ import {
   View,
   Text,
   Dimensions,
+  Platform,
+  Alert,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useState, useEffect } from "react";
+import * as common from "@/utils/common";
 
 export default function LoginScreen() {
   const router = useRouter(); // 페이지 이동을 위한 useRouter 사용
@@ -148,15 +151,82 @@ export default function LoginScreen() {
     }
   }, [newPassword, newPasswordChk]); // 비밀번호나 확인 비밀번호가 변경될 때마다 확인
 
-  const emailConfirm = () => {
-    console.log("이메일 인증 체크");
-    setAuthSent(true); // ✅ 인증번호 발송 상태 업데이트
+  const showAlert = (message: string) => {
+    if (Platform.OS === "web") {
+      window.alert(message);
+    } else {
+      Alert.alert(message);
+    }
   };
 
-  const cofirmNumCheck = () => {
-    console.log("인증번호 확인 체크");
-    setAuthConfirm(true);
+  const emailConfirm = async () => {
+    if (!userEmail) {
+      showAlert("이메일을 입력해주세요.");
+      return;
+    }
+    if (!common.isValidEmail(userEmail)) {
+      showAlert("올바른 이메일 형식을 입력해주세요.");
+      return;
+    }
+    try {
+      const response = await fetch("http://localhost:8080/user/confirmEmail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: userEmail }),
+      });
+
+      const result = await response.status;
+
+      if (result.valueOf() == 200) {
+        setAuthSent(true); // 인증번호 발송 상태 업데이트
+        showAlert("인증번호가 발송되었습니다.");
+      } else if (result.valueOf() == 404) {
+        showAlert("등록되지 않은 Email입니다. 다시 확인해주세요.");
+        setAuthSent(false);
+        setUserEmail("");
+      } else {
+        showAlert("이메일 인증 요청 실패. 다시 시도해주세요.");
+        setUserEmail("");
+        setAuthSent(false);
+      }
+    } catch (error) {
+      console.error("이메일 인증 요청 오류:", error);
+      showAlert("서버 오류가 발생했습니다. 관리자에게 문의하세요.");
+    }
   };
+
+  const cofirmNumCheck = async () => {
+    if (!confirmNum) {
+      showAlert("인증번호를 입력해주세요.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/user/checkAuthNum", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: userEmail, authNum: confirmNum }),
+      });
+
+      const result = await response.json();
+
+      if (result) {
+        setAuthConfirm(true); // 인증번호 발송 상태 업데이트
+      } else {
+        showAlert("인증번호가 올바르지 않습니다.");
+        setAuthConfirm(false);
+        setConfirmNum("");
+      }
+    } catch (error) {
+      console.error("이메일 인증 확인 오류:", error);
+      showAlert("서버 오류가 발생했습니다. 관리자에게 문의하세요.");
+    }
+  };
+
   const cancel = () => {
     console.log("비밀번호 재설정 취소");
   };
@@ -222,49 +292,55 @@ export default function LoginScreen() {
         {authConfirm && <Text style={styles.authMessage}>인증되었습니다.</Text>}
 
         {/* 비밀번호 입력창 */}
-        <TextInput
-          style={styles.input}
-          placeholder="새로운 비밀번호"
-          secureTextEntry
-          value={newPassword}
-          onChangeText={setNewPassword}
-          placeholderTextColor="#827F7F"
-        />
+        {authSent && authConfirm && (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="새로운 비밀번호"
+              secureTextEntry
+              value={newPassword}
+              onChangeText={setNewPassword}
+              placeholderTextColor="#827F7F"
+            />
 
-        {/* 비밀번호 확인 입력창 */}
-        <TextInput
-          style={styles.input3}
-          placeholder="비밀번호 확인"
-          secureTextEntry
-          value={newPasswordChk}
-          onChangeText={setNewPasswordChk}
-          placeholderTextColor="#827F7F"
-        />
+            {/* 비밀번호 확인 입력창 */}
+            <TextInput
+              style={styles.input3}
+              placeholder="비밀번호 확인"
+              secureTextEntry
+              value={newPasswordChk}
+              onChangeText={setNewPasswordChk}
+              placeholderTextColor="#827F7F"
+            />
 
-        {/* 비밀번호 불일치 메시지 */}
-        {!passwordsMatch && (
-          <Text style={styles.authMessage2}>비밀번호가 일치하지 않습니다.</Text>
+            {/* 비밀번호 불일치 메시지 */}
+            {!passwordsMatch && (
+              <Text style={styles.authMessage2}>
+                비밀번호가 일치하지 않습니다.
+              </Text>
+            )}
+
+            <View style={styles.rowContainer3}>
+              {/* 비밀번호 변경&취소 버튼 */}
+              <TouchableOpacity
+                style={styles.cancelButton}
+                //onPress={handleLogin}
+              >
+                <ThemedText style={styles.cancelButtonText} onPress={cancel}>
+                  취소
+                </ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.changeButton}
+                //onPress={handleLogin}
+              >
+                <ThemedText style={styles.buttonText} onPress={resetPw}>
+                  변경
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+          </>
         )}
-
-        <View style={styles.rowContainer3}>
-          {/* 비밀번호 변경&취소 버튼 */}
-          <TouchableOpacity
-            style={styles.cancelButton}
-            //onPress={handleLogin}
-          >
-            <ThemedText style={styles.cancelButtonText} onPress={cancel}>
-              취소
-            </ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.changeButton}
-            //onPress={handleLogin}
-          >
-            <ThemedText style={styles.buttonText} onPress={resetPw}>
-              변경
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
       </ThemedView>
     </>
   );
