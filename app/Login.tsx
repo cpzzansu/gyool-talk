@@ -12,13 +12,17 @@ import {
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
+import { useRouter } from "expo-router";
+import { useDispatch } from "react-redux";
+import { login } from "@/redux/slices/auth/authThunk";
+import { AppDispatch } from "@/redux/store";
 
 export default function LoginScreen() {
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+
   const [userId, setUserId] = useState(""); // 아이디 상태 관리
   const [password, setPassword] = useState(""); // 비밀번호 상태 관리
-  const navigation = useNavigation(); // navigation 객체
   const { width, height } = Dimensions.get("window");
 
   const showAlert = (title: string, message: string) => {
@@ -29,28 +33,32 @@ export default function LoginScreen() {
     }
   };
 
-  const login = () => {
-    if (userId.trim() === "") {
-      showAlert("아이디 입력 확인", "아이디가 입력되지 않았습니다.");
-    } else if (password.trim() === "") {
-      showAlert("비밀번호 입력 확인", "비밀번호가 입력되지 않았습니다.");
-    } else {
-      axios
-        .post("http://localhost:8080/login", { id: userId, pwd: password })
-        .then(function (resp: any) {
-          console.log(resp.data);
-          if (resp.data !== null && resp.data != "") {
-            console.log("로그인 성공");
-          } else {
-            showAlert("로그인 실패", "아이디나 비밀번호를 확인하세요.");
-            setUserId("");
-            setPassword("");
-          }
-        })
-        .catch(function (err: any) {
-          console.log(`Error Message: ${err}`);
-        });
-    }
+  // const login = () => {
+  //   if (userId.trim() === "") {
+  //     showAlert("아이디 입력 확인", "아이디가 입력되지 않았습니다.");
+  //   } else if (password.trim() === "") {
+  //     showAlert("비밀번호 입력 확인", "비밀번호가 입력되지 않았습니다.");
+  //   } else {
+  //     axios
+  //       .post("http://localhost:8080/login", { id: userId, pwd: password })
+  //       .then(function (resp: any) {
+  //         console.log(resp.data);
+  //         if (resp.data !== null && resp.data != "") {
+  //           console.log("로그인 성공");
+  //         } else {
+  //           showAlert("로그인 실패", "아이디나 비밀번호를 확인하세요.");
+  //           setUserId("");
+  //           setPassword("");
+  //         }
+  //       })
+  //       .catch(function (err: any) {
+  //         console.log(`Error Message: ${err}`);
+  //       });
+  //   }
+  // };
+
+  const handleLogin = async () => {
+    dispatch(login({ user: { userId, userPassword: password } }));
   };
 
   const snsLogin = (sns: string) => {
@@ -58,15 +66,15 @@ export default function LoginScreen() {
   };
 
   const findId = () => {
-    navigation.navigate("FindId");
+    router.push("/FindId");
   };
 
   const resetPw = () => {
-    navigation.navigate("ResetPw");
+    router.push("/ResetPw");
   };
 
   const join = () => {
-    navigation.navigate("Join");
+    router.push("/Join");
   };
 
   const styles = StyleSheet.create({
@@ -178,7 +186,7 @@ export default function LoginScreen() {
       />
 
       {/* 로그인 버튼 */}
-      <TouchableOpacity style={styles.loginButton} onPress={login}>
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <ThemedText style={styles.loginButtonText}>로그인</ThemedText>
       </TouchableOpacity>
 
