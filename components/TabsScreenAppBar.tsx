@@ -24,8 +24,8 @@ const TabsScreenAppBar: FC<TabsScreenAppBarProps> = ({ title, icons }) => {
     >
       <ThemedText type={"tabsScreenTitle"}>{title}</ThemedText>
       <AppBarIconContainer>
-        {icons.map((icon) => (
-          <AppBarIcon src={icon.src} />
+        {icons.map((icon, index) => (
+          <AppBarIcon src={icon.src} key={index} />
         ))}
       </AppBarIconContainer>
     </View>

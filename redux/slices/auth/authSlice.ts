@@ -4,14 +4,14 @@ import { login } from "@/redux/slices/auth/authThunk";
 
 export interface AuthState {
   userId: string;
-  nickname: string;
+  userNickname: string;
   token: string | null;
   isAuthorized: boolean;
 }
 
 const initialState: AuthState = {
   userId: "",
-  nickname: "",
+  userNickname: "",
   token: null,
   isAuthorized: false,
 };
@@ -28,18 +28,18 @@ const authSlice = createSlice({
       state.userId = "";
       state.token = null;
       state.isAuthorized = false;
-      state.nickname = "";
+      state.userNickname = "";
     },
     setNickname(state, action: PayloadAction<string>) {
-      state.nickname = action.payload;
+      state.userNickname = action.payload;
     },
     // 필요한 다른 액션들을 추가
   },
   extraReducers: (builder) => {
     builder.addCase(login.fulfilled, (state, action) => {
-      const { userId, nickname, token } = action.payload;
+      const { userId, userNickname, token } = action.payload;
       state.userId = userId;
-      state.nickname = nickname;
+      state.userNickname = userNickname;
       state.token = token;
     });
   },
