@@ -3,17 +3,20 @@ import {
   TouchableOpacity,
   TextInput,
   View,
+  Alert,
+  Platform,
   Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useState } from "react";
+import axios from "axios";
 
 export default function LoginScreen() {
   const { width, height } = Dimensions.get("window");
   const router = useRouter(); // 페이지 이동을 위한 useRouter 사용
-  const [username, setUsername] = useState(""); // 아이디 상태 관리
+  const [userId, setUserId] = useState(""); // 아이디 상태 관리
   const [password, setPassword] = useState(""); // 비밀번호 상태 관리
   const [passwordChk, setPasswordChk] = useState(""); // 비밀번호확인 상태 관리
   const [email, setEmail] = useState(""); // 이메일 상태 관리
@@ -21,35 +24,129 @@ export default function LoginScreen() {
   const [nickname, setNickName] = useState(""); // 닉네임 상태 관리
 
   const [isDuplicate, setIsDuplicate] = useState<boolean | null>(null); // 아이디 중복 여부
-  const [isConfirm, setIsConfirm] = useState<boolean | null>(null); // 아이디 중복 여부
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null); // 아이디 중복 여부
+  const [isConfirm, setIsConfirm] = useState(false); // 아이디 중복 여부
 
+  const showAlert = (title: string, message: string) => {
+    if (Platform.OS === "web") {
+      window.alert(`${title}\n\n${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
+
+  // 아이디 중복 체크
   const idCheck = () => {
-    console.log("아이디 중복체크");
-    const randomValue = Math.random() < 0.5 ? 0 : 1;
-    if (randomValue == 0) {
-      setIsDuplicate(true);
-    } else {
-      setIsDuplicate(false);
+    if (userId.trim() == "") {
+      showAlert("회원가입", "아이디를 입력해주세요.");
+      setIsDuplicate(null);
+      return;
     }
+    axios
+      .post("http://localhost:8080/join/idCheck", { id: userId.trim() })
+      .then(function (resp: any) {
+        console.log(resp.data);
+        if (resp.data) {
+          setIsDuplicate(true);
+          setUserId("");
+        } else {
+          setIsDuplicate(false);
+        }
+      })
+      .catch(function (err: any) {
+        console.log(`Error Message: ${err}`);
+      });
   };
 
+  //이메일 확인
   const emailConfirm = () => {
-    console.log("이메일 인증 체크");
-    setIsConfirm(true);
-  };
-  const cofirmNumCheck = () => {
-    console.log("인증번호 확인 체크");
-    const randomValue = Math.random() < 0.5 ? 0 : 1;
-    if (randomValue == 0) {
-      setIsCorrect(true);
-    } else {
-      setIsCorrect(false);
+    if (!email.includes("@")) {
+      showAlert("회원가입", "이메일 주소가 유효하지 않습니다.");
+      return;
     }
+    axios
+      .post("http://localhost:8080/api/user/confirmEmail", { email: email })
+      .then(function (resp: any) {
+        console.log(resp.data);
+        if (resp.data) {
+          showAlert("회원가입", "인증번호가 발송되었습니다.");
+          setIsConfirm(true);
+        } else {
+          showAlert("회원가입", "잠시후 다시 시도 해주세요.");
+        }
+      })
+      .catch(function (err: any) {
+        console.log(`Error Message: ${err}`);
+      });
   };
+
+  //인증번호 확인 todo)) 로직 연결
+  const cofirmNumCheck = () => {
+    if (!isConfirm) {
+      showAlert("회원가입", "이메일 인증버튼을 눌러주세요");
+      retrun;
+    }
+    console.log("인증번호 확인 체크");
+
+    axios
+      .post("http://localhost:8080/join/checkConfimNum", {
+        confirmNum: confirmNum,
+      })
+      .then(function (resp: any) {
+        console.log(resp.data);
+        if (resp.data) {
+          setIsCorrect(false);
+        } else {
+          setIsCorrect(true);
+        }
+      })
+      .catch(function (err: any) {
+        console.log(`Error Message: ${err}`);
+      });
+  };
+  //회원가입
   const join = () => {
-    console.log(width);
-    console.log(height);
+    let header = "회원가입";
+    let message = "완료되었습니다.";
+    if (userId.trim() == "") {
+      message = "아이디를 입력하세요";
+    } else if (isDuplicate == null) {
+      message = "아이디 중복확인 해주세요";
+    } else if (password.trim() == "") {
+      message = "비밀번호를 입력해주세요";
+    } else if (passwordChk.trim() == "") {
+      message = "비밀번호 확인 입력해주세요";
+    } else if (password.trim() != passwordChk.trim()) {
+      message = "비밀번호가 일치 하지 않습니다";
+    } else if (!isConfirm) {
+      message = "이메일 인증이 필요합니다";
+    } else if (isCorrect == null) {
+      message = "인증번호 확인이 필요합니다";
+    } else if (nickname == "") {
+      message = "닉네임을 입력해주세요";
+    } else {
+      axios
+        .post("http://localhost:8080/join/joinUser", {
+          userId: userId,
+          userPassword: password,
+          userEmail: email,
+          userNickName: nickname,
+        })
+        .then(function (resp: any) {
+          if (resp.data) {
+            console.log("회원가입 완료");
+            navigation.navigate("Login");
+            //라우팅 로그인 페이지
+          } else {
+            message = "잠시 후 다시 시도해주세요";
+          }
+        })
+        .catch(function (err: any) {
+          console.log(`Error Message: ${err}`);
+        });
+    }
+
+    showAlert(header, message);
   };
 
   const styles = StyleSheet.create({
@@ -148,7 +245,7 @@ export default function LoginScreen() {
         {/*기본 정보*/}
         <View style={{ width: width }}>
           <ThemedText type="title" style={styles.defaultExplain}>
-            기본 정보를 입력하세요.
+            기본 정보를{"\n"} 입력하세요.
           </ThemedText>
         </View>
         <ThemedView style={styles.inputGrp}>
@@ -158,8 +255,8 @@ export default function LoginScreen() {
               <TextInput
                 style={styles.inputBlock}
                 placeholder="아이디"
-                value={username}
-                onChangeText={setUsername}
+                value={userId}
+                onChangeText={setUserId}
                 placeholderTextColor="#827F7F"
               />
               <TouchableOpacity style={styles.buttonBlock} onPress={idCheck}>
@@ -193,27 +290,17 @@ export default function LoginScreen() {
           />
 
           {/* 이메일 입력창 */}
-          <View style={[styles.isText, styles.smallMb]}>
-            <View style={[styles.twoBlock]}>
-              <TextInput
-                style={styles.inputBlock}
-                placeholder="이메일"
-                value={email}
-                onChangeText={setEmail}
-                placeholderTextColor="#827F7F"
-              />
-              <TouchableOpacity
-                style={styles.buttonBlock}
-                onPress={emailConfirm}
-              >
-                <ThemedText style={styles.checkText}>인증</ThemedText>
-              </TouchableOpacity>
-            </View>
-            {isConfirm !== null && (
-              <ThemedText style={styles.okId}>
-                인증 메일이 발송되었습니다.
-              </ThemedText>
-            )}
+          <View style={[styles.twoBlock, styles.smallMb]}>
+            <TextInput
+              style={styles.inputBlock}
+              placeholder="이메일"
+              value={email}
+              onChangeText={setEmail}
+              placeholderTextColor="#827F7F"
+            />
+            <TouchableOpacity style={styles.buttonBlock} onPress={emailConfirm}>
+              <ThemedText style={styles.checkText}>인증</ThemedText>
+            </TouchableOpacity>
           </View>
           {/* 인증번호 입력창 */}
           <View style={[styles.isText, styles.largeMb]}>
@@ -241,7 +328,6 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             placeholder="닉네임"
-            secureTextEntry
             value={nickname}
             onChangeText={setNickName}
             placeholderTextColor="#827F7F"
