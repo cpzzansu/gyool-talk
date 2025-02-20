@@ -8,6 +8,7 @@ export type ThemedTextProps = TextProps & {
   type?:
     | "default"
     | "title"
+    | "settingTitle"
     | "defaultSemiBold"
     | "subtitle"
     | "link"
@@ -39,6 +40,7 @@ export function ThemedText({
         { color },
         type === "default" ? styles.default : undefined,
         type === "title" ? styles.title : undefined,
+        type === "settingTitle" ? styles.settingTitle : undefined,
         type === "defaultSemiBold" ? styles.defaultSemiBold : undefined,
         type === "subtitle" ? styles.subtitle : undefined,
         type === "link" ? styles.link : undefined,
@@ -74,4 +76,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#0a7ea4",
   },
+  settingTitle: {},
 });
