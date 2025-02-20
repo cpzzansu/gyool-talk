@@ -1,16 +1,17 @@
 // src/slices/authSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { login } from "@/redux/slices/auth/authThunk";
 
 export interface AuthState {
-  nickname: string;
-  refreshToken: string | null;
+  userId: string;
+  userNickname: string;
   token: string | null;
   isAuthorized: boolean;
 }
 
 const initialState: AuthState = {
-  nickname: "",
-  refreshToken: null,
+  userId: "",
+  userNickname: "",
   token: null,
   isAuthorized: false,
 };
@@ -24,18 +25,23 @@ const authSlice = createSlice({
       state.isAuthorized = true;
     },
     clearAuth(state) {
+      state.userId = "";
       state.token = null;
-      state.refreshToken = null;
       state.isAuthorized = false;
-      state.nickname = "";
+      state.userNickname = "";
     },
     setNickname(state, action: PayloadAction<string>) {
-      state.nickname = action.payload;
+      state.userNickname = action.payload;
     },
     // 필요한 다른 액션들을 추가
   },
   extraReducers: (builder) => {
-    // 필요에 따라 비동기 로직 처리
+    builder.addCase(login.fulfilled, (state, action) => {
+      const { userId, userNickname, token } = action.payload;
+      state.userId = userId;
+      state.userNickname = userNickname;
+      state.token = token;
+    });
   },
 });
 

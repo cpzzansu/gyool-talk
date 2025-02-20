@@ -1,6 +1,7 @@
-import { Image, View, Text, Dimensions } from "react-native";
+import { Image, View, Text, Dimensions, AppState } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import TabsScreenAppBar from "@/components/TabsScreenAppBar";
+import { useSelector } from "react-redux";
 
 const data = {
   nickname: "내 아이디",
@@ -16,6 +17,8 @@ const data = {
 
 const FirstView = () => {
   const { width } = Dimensions.get("window");
+
+  const { userNickname } = useSelector((state: any) => state.auth);
 
   return (
     <ThemedView
@@ -36,7 +39,7 @@ const FirstView = () => {
       />
 
       {/*내 프로필 아이템*/}
-      <ListItem id={data.nickname} marginBottom={0.063} />
+      <ListItem id={userNickname} marginBottom={0.063} />
 
       {/*구분선*/}
       <View style={{ borderBottomWidth: 1, borderBottomColor: "#e4e4e4" }} />
@@ -55,8 +58,8 @@ const FirstView = () => {
       </View>
 
       {/*친구 목록*/}
-      {data.friendsList.map((friend) => (
-        <ListItem id={friend.nickname} marginBottom={0.05} />
+      {data.friendsList.map((friend, index) => (
+        <ListItem id={friend.nickname} marginBottom={0.05} key={index} />
       ))}
     </ThemedView>
   );
