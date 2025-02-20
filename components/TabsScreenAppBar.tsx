@@ -12,11 +12,15 @@ interface TabsScreenAppBarProps {
 }
 
 const TabsScreenAppBar: FC<TabsScreenAppBarProps> = ({ title, icons }) => {
+  const { width } = Dimensions.get("window");
   return (
     <View
       style={{
-        paddingTop: "20%",
-        paddingBottom: "11%",
+        backgroundColor: "#DCD7CB",
+        paddingTop: width * 0.2,
+        paddingBottom: width * 0.05,
+        paddingLeft: width * 0.045,
+        paddingRight: width * 0.045,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",

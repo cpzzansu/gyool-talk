@@ -1,4 +1,11 @@
-import { Image, View, Text, Dimensions, AppState } from "react-native";
+import {
+  Image,
+  View,
+  Text,
+  Dimensions,
+  AppState,
+  ScrollView,
+} from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import TabsScreenAppBar from "@/components/TabsScreenAppBar";
 import { useSelector } from "react-redux";
@@ -21,15 +28,7 @@ const FirstView = () => {
   const { userNickname } = useSelector((state: any) => state.auth);
 
   return (
-    <ThemedView
-      style={{
-        backgroundColor: "#DCD7CB",
-        paddingLeft: "5%",
-        paddingRight: "5%",
-        height: "100%",
-      }}
-    >
-      {/*Tabs Screen App Bar*/}
+    <>
       <TabsScreenAppBar
         title={"친구"}
         icons={[
@@ -37,31 +36,45 @@ const FirstView = () => {
           { src: require("@/assets/images/icon/add-friend-icon.png") },
         ]}
       />
-
-      {/*내 프로필 아이템*/}
-      <ListItem id={userNickname} marginBottom={0.063} />
-
-      {/*구분선*/}
-      <View style={{ borderBottomWidth: 1, borderBottomColor: "#e4e4e4" }} />
-
-      {/*친구 수*/}
-      <View style={{ marginTop: width * 0.034 }}>
-        <Text
+      <ScrollView style={{ backgroundColor: "#DCD7CB" }}>
+        {/*Tabs Screen App Bar*/}
+        <ThemedView
           style={{
-            fontSize: width * 0.03,
-            marginBottom: width * 0.013,
-            fontFamily: "pretendardMedium",
+            backgroundColor: "#DCD7CB",
+            paddingTop: width * 0.06,
+            paddingLeft: width * 0.045,
+            paddingRight: width * 0.045,
+            height: "100%",
           }}
         >
-          친구 {data.friendsList.length}
-        </Text>
-      </View>
+          {/*내 프로필 아이템*/}
+          <ListItem id={userNickname} marginBottom={0.063} />
 
-      {/*친구 목록*/}
-      {data.friendsList.map((friend, index) => (
-        <ListItem id={friend.nickname} marginBottom={0.05} key={index} />
-      ))}
-    </ThemedView>
+          {/*구분선*/}
+          <View
+            style={{ borderBottomWidth: 1, borderBottomColor: "#e4e4e4" }}
+          />
+
+          {/*친구 수*/}
+          <View style={{ marginTop: width * 0.034 }}>
+            <Text
+              style={{
+                fontSize: width * 0.03,
+                marginBottom: width * 0.013,
+                fontFamily: "pretendardMedium",
+              }}
+            >
+              친구 {data.friendsList.length}
+            </Text>
+          </View>
+
+          {/*친구 목록*/}
+          {data.friendsList.map((friend, index) => (
+            <ListItem id={friend.nickname} marginBottom={0.05} key={index} />
+          ))}
+        </ThemedView>
+      </ScrollView>
+    </>
   );
 };
 

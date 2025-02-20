@@ -1,109 +1,168 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import {
+  StyleSheet,
+  Image,
+  Platform,
+  Dimensions,
+  ScrollView,
+  View,
+  Text,
+} from "react-native";
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Collapsible } from "@/components/Collapsible";
+import { ExternalLink } from "@/components/ExternalLink";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useSelector } from "react-redux";
+import TabsScreenAppBar from "@/components/TabsScreenAppBar";
 
+const data = [
+  {
+    chatroomName: "채팅방1",
+    messages: [{ content: "마지막 채팅 내용1", timestamp: "2025.02.20" }],
+  },
+  {
+    chatroomName: "채팅방2",
+    messages: [{ content: "마지막 채팅 내용2", timestamp: "2025.02.20" }],
+  },
+  {
+    chatroomName: "채팅방3",
+    messages: [{ content: "마지막 채팅 내용3", timestamp: "2025.02.20" }],
+  },
+  {
+    chatroomName: "채팅방4",
+    messages: [{ content: "마지막 채팅 내용4", timestamp: "2025.02.20" }],
+  },
+  {
+    chatroomName: "채팅방5",
+    messages: [{ content: "마지막 채팅 내용5", timestamp: "2025.02.20" }],
+  },
+  {
+    chatroomName: "채팅방6",
+    messages: [{ content: "마지막 채팅 내용6", timestamp: "2025.02.20" }],
+  },
+  {
+    chatroomName: "채팅방7",
+    messages: [{ content: "마지막 채팅 내용7", timestamp: "2025.02.20" }],
+  },
+];
 export default function TabTwoScreen() {
+  const { width } = Dimensions.get("window");
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <>
+      <TabsScreenAppBar
+        title={"채팅"}
+        icons={[
+          { src: require("@/assets/images/icon/chatting-search-icon.png") },
+          { src: require("@/assets/images/icon/add-chatting.png") },
+        ]}
+      />
+      <ScrollView style={{ backgroundColor: "#DCD7CB" }}>
+        {/*Tabs Screen App Bar*/}
+        <ThemedView
+          style={{
+            backgroundColor: "#DCD7CB",
+            paddingTop: width * 0.06,
+            paddingLeft: width * 0.045,
+            paddingRight: width * 0.045,
+            height: "100%",
+          }}
+        >
+          {/*친구 목록*/}
+          {data.map((chat, index) => {
+            const message = chat.messages.pop();
+            return (
+              <ListItem
+                chatroomName={chat.chatroomName}
+                lastMessage={message?.content!}
+                timestamp={message?.timestamp!}
+                marginBottom={0.05}
+                key={index}
+              />
+            );
+          })}
+        </ThemedView>
+      </ScrollView>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
+// 친구 목록 아이템 컴포넌트
+const ListItem = ({
+  chatroomName,
+  lastMessage,
+  marginBottom,
+  timestamp,
+}: {
+  chatroomName: string;
+  lastMessage: string;
+  marginBottom: number;
+  timestamp: string;
+}) => {
+  const { width } = Dimensions.get("window");
+
+  return (
+    <View
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: width * marginBottom,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: width * 0.022,
+        }}
+      >
+        <Image
+          style={{ width: width * 0.1, height: width * 0.109 }}
+          source={require("@/assets/images/icon/friends-list-profile.png")}
+        />
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: width * 0.005,
+          }}
+        >
+          <Text
+            style={{ fontSize: width * 0.029, fontFamily: "pretendardMedium" }}
+          >
+            {chatroomName}
+          </Text>
+          <Text
+            style={{
+              fontSize: width * 0.027,
+              fontFamily: "pretendardMedium",
+              color: "#848484",
+            }}
+          >
+            {lastMessage}
+          </Text>
+        </View>
+      </View>
+      <View
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: width * 0.027,
+            fontFamily: "pretendardMedium",
+            color: "#848484",
+          }}
+        >
+          {timestamp}
+        </Text>
+      </View>
+    </View>
+  );
+};
