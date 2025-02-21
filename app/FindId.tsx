@@ -133,7 +133,7 @@ export default function LoginScreen() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: userEmail }),
+        body: JSON.stringify({ userEmail: userEmail }),
       });
 
       const result = await response.status;
@@ -194,7 +194,7 @@ export default function LoginScreen() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email: userEmail }),
+          body: JSON.stringify({ userEmail: userEmail }),
         });
 
         const result = await response.json();

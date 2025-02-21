@@ -85,23 +85,23 @@ export default function LoginScreen() {
       backgroundColor: "#DCD7CB",
     },
     logo: {
-      marginTop: height * 0.1,
+      marginTop: width * 0.2,
       width: width * 0.1,
       height: width * 0.1,
-      marginBottom: height * 0.01,
+      marginBottom: width * 0.02,
       resizeMode: "contain", // 원본 비율 유지
     },
     input: {
       width: width * 0.9, // ✅ width, height를 여기서 사용
-      height: height * 0.05,
+      height: width * 0.1,
       borderRadius: 3,
       paddingHorizontal: width * 0.03,
       backgroundColor: "#EFEFEF",
-      marginBottom: height * 0.015,
+      marginBottom: width * 0.03,
     },
     loginButton: {
       width: width * 0.9,
-      height: height * 0.05,
+      height: width * 0.1,
       backgroundColor: "#EF7417",
       alignItems: "center",
       justifyContent: "center",
@@ -114,7 +114,7 @@ export default function LoginScreen() {
     orContainer: {
       flexDirection: "row",
       alignItems: "center",
-      marginVertical: height * 0.03,
+      marginVertical: width * 0.06,
       width: "100%",
       justifyContent: "center",
     },
@@ -130,7 +130,7 @@ export default function LoginScreen() {
     },
     loginImage: {
       width: width * 0.44,
-      height: height * 0.04,
+      height: width * 0.1,
       borderRadius: 6,
       borderColor: "#858886",
       borderWidth: 0.5,
@@ -139,14 +139,14 @@ export default function LoginScreen() {
       flexDirection: "row",
       justifyContent: "space-around",
       alignItems: "center",
-      marginTop: height * 0.01,
+      marginTop: width * 0.02,
       gap: 5,
     },
     textRow: {
       flexDirection: "row",
       justifyContent: "center",
       alignItems: "center",
-      marginTop: height * 0.04,
+      marginTop: width * 0.09,
     },
     textButton: {
       fontSize: width * 0.03,
