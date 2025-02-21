@@ -13,7 +13,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useState, useEffect } from "react";
 import * as common from "@/utils/common";
-
+import { useNavigation } from "@react-navigation/native";
 export default function LoginScreen() {
   const router = useRouter(); // 페이지 이동을 위한 useRouter 사용
   const [userId, setUserId] = useState(""); // userid 상태 관리
@@ -25,7 +25,7 @@ export default function LoginScreen() {
   const [authConfirm, setAuthConfirm] = useState(false); // ✅ 인증번호 확인 여부
   const [passwordsMatch, setPasswordsMatch] = useState(true); // 비밀번호 일치 여부 관리
   const { width, height } = Dimensions.get("window");
-
+  const navigation = useNavigation();
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -34,8 +34,8 @@ export default function LoginScreen() {
       backgroundColor: "#DCD7CB",
     },
     textContainer: {
-      marginTop: height * 0.05,
-      marginVertical: height * 0.03,
+      marginTop: width * 0.1,
+      marginVertical: width * 0.06,
       width: "100%",
       justifyContent: "center",
       fontSize: width * 0.03,
@@ -46,44 +46,44 @@ export default function LoginScreen() {
     },
     input: {
       width: width * 0.9,
-      height: height * 0.05,
+      height: width * 0.1,
       borderRadius: 3,
       paddingHorizontal: width * 0.03,
       backgroundColor: "#EFEFEF",
-      marginBottom: height * 0.015,
+      marginBottom: width * 0.03,
     },
     input2: {
       width: width * 0.9,
-      height: height * 0.05,
+      height: width * 0.1,
       borderRadius: 3,
       paddingHorizontal: width * 0.03,
       backgroundColor: "#EFEFEF",
     },
     input3: {
       width: width * 0.9,
-      height: height * 0.05,
+      height: width * 0.1,
       borderRadius: 3,
       paddingHorizontal: width * 0.03,
       backgroundColor: "#EFEFEF",
-      marginBottom: passwordsMatch ? height * 0.015 : height * 0.005,
+      marginBottom: passwordsMatch ? width * 0.01 : width * 0.032,
     },
     rowContainer: {
       flexDirection: "row",
       justifyContent: "space-between", // 요소 사이에 공간을 균등 배치
       width: "100%", // 전체 너비를 차지하도록 설정
-      marginBottom: authSent ? height * 0.005 : height * 0.015,
+      marginBottom: authSent ? width * 0.01 : width * 0.032,
       gap: 5,
     },
     rowContainer2: {
       flexDirection: "row",
       justifyContent: "space-between", // 요소 사이에 공간을 균등 배치
       width: "100%", // 전체 너비를 차지하도록 설정
-      marginBottom: authConfirm ? height * 0.005 : height * 0.015,
+      marginBottom: authConfirm ? width * 0.01 : width * 0.032,
       gap: 5,
     },
     authButton: {
       width: width * 0.15, // 버튼 크기 지정
-      height: height * 0.05,
+      height: width * 0.1,
       backgroundColor: "#EF7417",
       alignItems: "center",
       justifyContent: "center",
@@ -93,7 +93,7 @@ export default function LoginScreen() {
       paddingHorizontal: width * 0.03, // 버튼 크기를 내용에 맞게 설정
       flex: 1,
       width: width * 0.43, // 버튼 크기 지정
-      height: height * 0.05,
+      height: width * 0.1,
       backgroundColor: "#FAFAFA",
       alignItems: "center",
       justifyContent: "center",
@@ -108,7 +108,7 @@ export default function LoginScreen() {
       paddingHorizontal: width * 0.03, // 버튼 크기를 내용에 맞게 설정
       flex: 1,
       width: width * 0.43, // 버튼 크기 지정
-      height: height * 0.05,
+      height: width * 0.1,
       backgroundColor: "#EF7417",
       alignItems: "center",
       justifyContent: "center",
@@ -123,21 +123,21 @@ export default function LoginScreen() {
       flexDirection: "row",
       justifyContent: "space-between",
       width: "100%", // 전체 너비를 사용하여 균등 정렬
-      marginBottom: height * 0.015,
+      marginBottom: width * 0.03,
       gap: 5,
     },
     authMessage: {
       width: "100%",
       justifyContent: "center",
       fontSize: width * 0.025,
-      marginBottom: height * 0.005,
+      marginBottom: width * 0.01,
       color: "#2E970B",
     },
     authMessage2: {
       width: "100%",
       justifyContent: "center",
       fontSize: width * 0.025,
-      marginBottom: height * 0.005,
+      marginBottom: width * 0.01,
       color: "#D60303",
     },
   });
@@ -174,7 +174,7 @@ export default function LoginScreen() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: userEmail }),
+        body: JSON.stringify({ userEmail: userEmail }),
       });
 
       const result = await response.status;
@@ -230,11 +230,39 @@ export default function LoginScreen() {
   const cancel = () => {
     console.log("비밀번호 재설정 취소");
   };
-  const resetPw = () => {
+  const resetPw = async () => {
     if (passwordsMatch) {
       console.log("비밀번호 재설정 success!");
     } else {
       console.log("비밀번호 재설정 fail!");
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/user/resetPassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userEmail: userEmail,
+          userId: userId,
+          userPassword: newPassword,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result) {
+        showAlert("비밀번호를 재설정했습니다");
+        navigation.navigate("Login");
+      } else {
+        showAlert("비밀번호 재설정에 실패했습니다.");
+        setAuthConfirm(false);
+        setConfirmNum("");
+      }
+    } catch (error) {
+      console.error("비밀번호 재설정 오류:", error);
+      showAlert("서버 오류가 발생했습니다. 관리자에게 문의하세요.");
     }
   };
 
