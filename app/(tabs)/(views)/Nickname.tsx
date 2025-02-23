@@ -17,15 +17,26 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { RootState } from "@/redux/reducer";
+import GeneralAppBar from "@/components/GeneralAppBar";
 
-export default function LoginScreen() {
+export default function updateScreen() {
   const router = useRouter();
   const { width } = Dimensions.get("window");
-
+  const maxLength = 16;
   const userNickname = useSelector(
     (state: RootState) => state.auth.userNickname,
   );
-  const [nickname, setUserNickname] = useState("");
+  const [nickname, setUserNickname] = useState(userNickname);
+  const updateNickname = () => {
+    console.log("닉네임업데이트 로직 추가");
+    console.log(nickname, "변경 닉네임");
+  };
+  const handleNicknameChange = (text: string) => {
+    if (text.length <= maxLength) {
+      setUserNickname(text);
+    }
+  };
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -39,9 +50,13 @@ export default function LoginScreen() {
       borderRadius: 3,
       paddingHorizontal: width * 0.03,
       backgroundColor: "#EFEFEF",
-      marginBottom: width * 0.03,
     },
-    loginButton: {
+    maxLength: {
+      marginBottom: width * 0.03,
+      textAlign: "right",
+      color: "#827F7F",
+    },
+    updateButton: {
       width: width * 0.9,
       height: width * 0.1,
       backgroundColor: "#EF7417",
@@ -49,24 +64,37 @@ export default function LoginScreen() {
       justifyContent: "center",
       borderRadius: 3,
     },
-    loginButtonText: {
+    updateButtonText: {
       color: "#F1F1F1",
       fontSize: width * 0.04,
     },
   });
 
   return (
-    <ThemedView style={styles.container}>
-      {/* 이메일  확인*/}
-      <View>
-        <TextInput
-          style={styles.input}
-          placeholder={userNickname}
-          value={nickname}
-          onChangeText={setUserNickname}
-          placeholderTextColor="#827F7F"
-        />
-      </View>
-    </ThemedView>
+    <>
+      <GeneralAppBar title={"닉네임 변경"} />
+      <ThemedView style={styles.container}>
+        {/* 이메일  확인*/}
+        <View>
+          <TextInput
+            style={styles.input}
+            placeholderTextColor="#827F7F"
+            placeholder={userNickname}
+            value={nickname}
+            onChangeText={handleNicknameChange}
+            maxLength={maxLength}
+          />
+          <Text style={styles.maxLength}>
+            {nickname.length}/{maxLength} {/* 현재 길이 / 최대 길이 표시 */}
+          </Text>
+          <TouchableOpacity
+            style={styles.updateButton}
+            onPress={updateNickname}
+          >
+            <ThemedText style={styles.updateButtonText}>변경</ThemedText>
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    </>
   );
 }

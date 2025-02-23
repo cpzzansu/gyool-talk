@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { RootState } from "@/redux/reducer";
+import GeneralAppBar from "@/components/GeneralAppBar";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -31,12 +32,12 @@ export default function LoginScreen() {
     (state: RootState) => state.auth.userNickname,
   );
   const userEmail = useSelector((state: RootState) => state.auth.userEmail);
-
-  const imgUrl = "../../../assets/images/cat.jpg";
-  const handleLogin = () => {
+  //todo 폰 접근 사진 가져오기 기능
+  const selectImg = () => {
     setIsprofile(!isProfile);
+    console.log("폰저장 사진 가져오기 기능 추가 예졍");
   };
-
+  const imgUrl = "../../../assets/images/cat.jpg";
   const updateNickName = () => {
     router.push("/Nickname");
   };
@@ -49,18 +50,35 @@ export default function LoginScreen() {
       backgroundColor: "#DCD7CB",
     },
     logo: {
-      marginTop: width * 0.217,
+      marginTop: width * 0.01,
       width: width * 0.32,
       height: width * 0.32,
-      marginBottom: width * 0.02,
+      marginBottom: width * 0.045,
       resizeMode: "contain", // 원본 비율 유지
     },
     profileImg: {
-      marginTop: width * 0.217,
+      marginTop: width * 0.01,
       width: width * 0.32,
       height: width * 0.32,
-      marginBottom: width * 0.02,
+      marginBottom: width * 0.045,
       borderRadius: 100,
+    },
+    camera: {
+      width: width * 0.06,
+      height: width * 0.06,
+      backgroundColor: "#ffc953",
+      padding: width * 0.04,
+      borderRadius: 50,
+      position: "absolute",
+      right: width * 0.02,
+      bottom: width * 0.045,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    icon: {
+      width: width * 0.045,
+      height: width * 0.045,
     },
     inputView: {
       width: width * 0.9,
@@ -103,39 +121,49 @@ export default function LoginScreen() {
   });
 
   return (
-    <ThemedView style={styles.container}>
-      {/* 로고 */}
-      <Image
-        source={
-          isProfile ? require(imgUrl) : require("@/assets/images/gyoolTalk.png")
-        }
-        style={isProfile ? styles.profileImg : styles.logo}
-      />
-      {/* 닉네임  확인*/}
-      <TouchableOpacity onPress={updateNickName}>
-        <View style={styles.inputView}>
-          <Text style={styles.inputKey}>닉네임</Text>
-          <Text style={[styles.inputValue, styles.nickName]}>
-            {userNickname}
-          </Text>
-          <Image source={require("@/assets/images/icon/right-arrow.png")} />
+    <>
+      <GeneralAppBar title={"프로필"} />
+      <ThemedView style={styles.container}>
+        <View>
+          {/* 로고 */}
+          <TouchableOpacity onPress={selectImg}>
+            <Image
+              source={
+                isProfile
+                  ? require(imgUrl)
+                  : require("@/assets/images/gyoolTalk.png")
+              }
+              style={isProfile ? styles.profileImg : styles.logo}
+            />
+            <View style={styles.camera}>
+              <Image
+                style={styles.icon}
+                source={require("@/assets/images/icon/camera.png")}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
-      {/* 아이디  확인*/}
-      <View style={styles.inputView}>
-        <Text style={styles.inputKey}>아이디</Text>
-        <Text style={styles.inputValue}>{userId}</Text>
-      </View>
-      {/* 이메일  확인*/}
-      <View style={styles.inputView}>
-        <Text style={styles.inputKey}>이메일</Text>
-        <Text style={styles.inputValue}>{userEmail}</Text>
-      </View>
-
-      {/* 로그인 버튼 */}
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <ThemedText style={styles.loginButtonText}>로그인</ThemedText>
-      </TouchableOpacity>
-    </ThemedView>
+        {/* 닉네임  확인*/}
+        <TouchableOpacity onPress={updateNickName}>
+          <View style={styles.inputView}>
+            <Text style={styles.inputKey}>닉네임</Text>
+            <Text style={[styles.inputValue, styles.nickName]}>
+              {userNickname}
+            </Text>
+            <Image source={require("@/assets/images/icon/right-arrow.png")} />
+          </View>
+        </TouchableOpacity>
+        {/* 아이디  확인*/}
+        <View style={styles.inputView}>
+          <Text style={styles.inputKey}>아이디</Text>
+          <Text style={styles.inputValue}>{userId}</Text>
+        </View>
+        {/* 이메일  확인*/}
+        <View style={styles.inputView}>
+          <Text style={styles.inputKey}>이메일</Text>
+          <Text style={styles.inputValue}>{userEmail}</Text>
+        </View>
+      </ThemedView>
+    </>
   );
 }
