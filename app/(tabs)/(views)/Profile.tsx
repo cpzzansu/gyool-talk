@@ -14,8 +14,9 @@ import { ThemedText } from "@/components/ThemedText";
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
-import { login } from "@/redux/slices/auth/authThunk";
+import { useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store";
+import { RootState } from "@/redux/reducer";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -24,13 +25,20 @@ export default function LoginScreen() {
   const [isProfile, setIsprofile] = useState(false);
   const [password, setPassword] = useState(""); // 비밀번호 상태 관리
   const { width, height } = Dimensions.get("window");
-  const imgUrl = "../assets/images/cat.jpg";
+
+  const userId = useSelector((state: RootState) => state.auth.userId);
+  const userNickname = useSelector(
+    (state: RootState) => state.auth.userNickname,
+  );
+  const userEmail = useSelector((state: RootState) => state.auth.userEmail);
+
+  const imgUrl = "../../../assets/images/cat.jpg";
   const handleLogin = () => {
     setIsprofile(!isProfile);
   };
 
   const updateNickName = () => {
-    //router.push("/NickName");
+    router.push("/Nickname");
   };
 
   const styles = StyleSheet.create({
@@ -82,7 +90,7 @@ export default function LoginScreen() {
     },
     loginButton: {
       width: width * 0.9,
-      height: height * 0.05,
+      height: width * 0.1,
       backgroundColor: "#EF7417",
       alignItems: "center",
       justifyContent: "center",
@@ -108,7 +116,7 @@ export default function LoginScreen() {
         <View style={styles.inputView}>
           <Text style={styles.inputKey}>닉네임</Text>
           <Text style={[styles.inputValue, styles.nickName]}>
-            test닉네임입니다용
+            {userNickname}
           </Text>
           <Image source={require("@/assets/images/icon/right-arrow.png")} />
         </View>
@@ -116,12 +124,12 @@ export default function LoginScreen() {
       {/* 아이디  확인*/}
       <View style={styles.inputView}>
         <Text style={styles.inputKey}>아이디</Text>
-        <Text style={styles.inputValue}>test1</Text>
+        <Text style={styles.inputValue}>{userId}</Text>
       </View>
       {/* 이메일  확인*/}
       <View style={styles.inputView}>
         <Text style={styles.inputKey}>이메일</Text>
-        <Text style={styles.inputValue}>test@test.com</Text>
+        <Text style={styles.inputValue}>{userEmail}</Text>
       </View>
 
       {/* 로그인 버튼 */}

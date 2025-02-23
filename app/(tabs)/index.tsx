@@ -4,11 +4,13 @@ import {
   Text,
   Dimensions,
   AppState,
+  TouchableOpacity,
   ScrollView,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import TabsScreenAppBar from "@/components/TabsScreenAppBar";
 import { useSelector } from "react-redux";
+import { useRouter } from "expo-router";
 
 const data = {
   nickname: "내 아이디",
@@ -27,13 +29,27 @@ const FirstView = () => {
 
   const { userNickname } = useSelector((state: any) => state.auth);
 
+  const router = useRouter();
+  const goProfile = () => {
+    router.push("/Profile");
+  };
+
+
   return (
     <>
       <TabsScreenAppBar
         title={"친구"}
         icons={[
-          { src: require("@/assets/images/icon/search-icon.png") },
-          { src: require("@/assets/images/icon/add-friend-icon.png") },
+          {
+            src: require("@/assets/images/icon/search-icon.png"),
+            onPress: () => {},
+          },
+          {
+            src: require("@/assets/images/icon/add-friend-icon.png"),
+            onPress: () => {
+              router.push("/AddFriend");
+            },
+          },
         ]}
       />
       <ScrollView style={{ backgroundColor: "#DCD7CB" }}>
@@ -48,7 +64,9 @@ const FirstView = () => {
           }}
         >
           {/*내 프로필 아이템*/}
-          <ListItem id={userNickname} marginBottom={0.063} />
+            <TouchableOpacity onPress={goProfile}>
+                <ListItem id={userNickname} marginBottom={0.063} />
+            </TouchableOpacity>
 
           {/*구분선*/}
           <View
