@@ -1,9 +1,17 @@
-import { Dimensions, Image, ImageSourcePropType, View } from "react-native";
+import {
+  Dimensions,
+  GestureResponderEvent,
+  Image,
+  ImageSourcePropType,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { FC, ReactNode } from "react";
 
 interface IconItem {
   src: ImageSourcePropType;
+  onPress: (event: GestureResponderEvent) => void;
 }
 
 interface TabsScreenAppBarProps {
@@ -29,7 +37,7 @@ const TabsScreenAppBar: FC<TabsScreenAppBarProps> = ({ title, icons }) => {
       <ThemedText type={"tabsScreenTitle"}>{title}</ThemedText>
       <AppBarIconContainer>
         {icons.map((icon, index) => (
-          <AppBarIcon src={icon.src} key={index} />
+          <AppBarIcon src={icon.src} key={index} onPress={icon.onPress} />
         ))}
       </AppBarIconContainer>
     </View>
@@ -52,18 +60,26 @@ const AppBarIconContainer = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const AppBarIcon = ({ src }: { src: ImageSourcePropType }) => {
+const AppBarIcon = ({
+  src,
+  onPress,
+}: {
+  src: ImageSourcePropType;
+  onPress: (event: GestureResponderEvent) => void;
+}) => {
   const { width } = Dimensions.get("window");
 
   return (
-    <Image
-      style={{
-        width: width * 0.072,
-        height: width * 0.072,
-        resizeMode: "contain",
-      }}
-      source={src}
-    />
+    <TouchableOpacity onPress={onPress}>
+      <Image
+        style={{
+          width: width * 0.072,
+          height: width * 0.072,
+          resizeMode: "contain",
+        }}
+        source={src}
+      />
+    </TouchableOpacity>
   );
 };
 
