@@ -6,6 +6,7 @@ import {
   Alert,
   Platform,
   Dimensions,
+  Text,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
@@ -84,7 +85,7 @@ export default function LoginScreen() {
   const cofirmNumCheck = () => {
     if (!isConfirm) {
       showAlert("회원가입", "이메일 인증버튼을 눌러주세요");
-      retrun;
+      return;
     }
     console.log("인증번호 확인 체크");
 
@@ -104,6 +105,8 @@ export default function LoginScreen() {
         console.log(`Error Message: ${err}`);
       });
   };
+  //닉네임 길이 확인
+  const maxLength = 16;
   //회원가입
   const join = () => {
     let header = "회원가입";
@@ -135,7 +138,7 @@ export default function LoginScreen() {
         .then(function (resp: any) {
           if (resp.data) {
             console.log("회원가입 완료");
-            navigation.navigate("Login");
+            router.push("/Login");
             //라우팅 로그인 페이지
           } else {
             message = "잠시 후 다시 시도해주세요";
@@ -211,6 +214,11 @@ export default function LoginScreen() {
       color: "#F1F1F1",
       fontSize: width * 0.045,
       fontWeight: "bold",
+    },
+    maxLength: {
+      marginBottom: width * 0.03,
+      textAlign: "right",
+      color: "#827F7F",
     },
     joinButton: {
       width: "100%",
@@ -330,8 +338,12 @@ export default function LoginScreen() {
             placeholder="닉네임"
             value={nickname}
             onChangeText={setNickName}
+            maxLength={maxLength}
             placeholderTextColor="#827F7F"
           />
+          <Text style={styles.maxLength}>
+            {nickname.length}/{maxLength} {/* 현재 길이 / 최대 길이 표시 */}
+          </Text>
         </ThemedView>
         {/*회원가입 버튼*/}
         <TouchableOpacity style={styles.joinButton} onPress={join}>

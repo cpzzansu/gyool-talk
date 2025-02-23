@@ -4,6 +4,7 @@ import {
   Text,
   Dimensions,
   AppState,
+  TouchableOpacity,
   ScrollView,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
@@ -29,6 +30,10 @@ const FirstView = () => {
   const { userNickname } = useSelector((state: any) => state.auth);
 
   const router = useRouter();
+  const goProfile = () => {
+    router.push("/Profile");
+  };
+
 
   return (
     <>
@@ -59,7 +64,9 @@ const FirstView = () => {
           }}
         >
           {/*내 프로필 아이템*/}
-          <ListItem id={userNickname} marginBottom={0.063} />
+            <TouchableOpacity onPress={goProfile}>
+                <ListItem id={userNickname} marginBottom={0.063} />
+            </TouchableOpacity>
 
           {/*구분선*/}
           <View
