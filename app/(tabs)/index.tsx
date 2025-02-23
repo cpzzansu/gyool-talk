@@ -9,6 +9,7 @@ import {
 import { ThemedView } from "@/components/ThemedView";
 import TabsScreenAppBar from "@/components/TabsScreenAppBar";
 import { useSelector } from "react-redux";
+import { useRouter } from "expo-router";
 
 const data = {
   nickname: "내 아이디",
@@ -27,13 +28,23 @@ const FirstView = () => {
 
   const { userNickname } = useSelector((state: any) => state.auth);
 
+  const router = useRouter();
+
   return (
     <>
       <TabsScreenAppBar
         title={"친구"}
         icons={[
-          { src: require("@/assets/images/icon/search-icon.png") },
-          { src: require("@/assets/images/icon/add-friend-icon.png") },
+          {
+            src: require("@/assets/images/icon/search-icon.png"),
+            onPress: () => {},
+          },
+          {
+            src: require("@/assets/images/icon/add-friend-icon.png"),
+            onPress: () => {
+              router.push("/AddFriend");
+            },
+          },
         ]}
       />
       <ScrollView style={{ backgroundColor: "#DCD7CB" }}>

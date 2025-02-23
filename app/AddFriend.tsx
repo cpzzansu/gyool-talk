@@ -16,8 +16,9 @@ import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "@/redux/slices/auth/authThunk";
 import { AppDispatch, RootState } from "@/redux/store";
+import GeneralAppBar from "@/components/GeneralAppBar";
 
-export default function LoginScreen() {
+export default function AddFriend() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -169,58 +170,61 @@ export default function LoginScreen() {
   });
 
   return (
-    <ThemedView style={styles.container}>
-      {/* 아이디 검색*/}
-      <View style={styles.rowContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="검색아이디"
-          value={selectId}
-          onChangeText={setSelectId}
-          placeholderTextColor="#827F7F"
-          returnKeyType="search" // 키보드의 'Enter' 버튼을 'Search'로 변경
-          onSubmitEditing={findFriend} // 엔터(또는 검색 버튼) 눌렀을 때 실행될 함수
-        />
-      </View>
-
-      <View style={styles.inputView}>
-        <Text style={styles.inputKey}>내 아이디</Text>
-        <Text style={styles.inputValue}>{userId}</Text>
-      </View>
-
-      <View style={styles.line} />
-
-      {/* 검색 결과가 있을 경우 아이디 & 추가 버튼 표시 */}
-      {friendId ? (
-        <View style={styles.rowContainer2}>
-          {/* 프로필 이미지 */}
-          {userProfileImg ? (
-            <Image source={{ uri: userProfileImg }} style={styles.profile} />
-          ) : (
-            <Image
-              source={require("@/assets/images/gyoolTalk.png")}
-              style={styles.profile}
-            />
-          )}
-
-          {/* 아이디 (왼쪽) */}
-          <View style={{ flex: 1, marginLeft: 10 }}>
-            <Text style={styles.infoText}>{friendId}</Text>
-          </View>
-
-          {/* 추가 버튼 (오른쪽) */}
-          <TouchableOpacity style={styles.addButton} onPress={addFriend}>
-            <ThemedText style={styles.addButtonText}>추가</ThemedText>
-          </TouchableOpacity>
+    <>
+      <GeneralAppBar title={"친구추가"} />
+      <ThemedView style={styles.container}>
+        {/* 아이디 검색*/}
+        <View style={styles.rowContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="검색아이디"
+            value={selectId}
+            onChangeText={setSelectId}
+            placeholderTextColor="#827F7F"
+            returnKeyType="search" // 키보드의 'Enter' 버튼을 'Search'로 변경
+            onSubmitEditing={findFriend} // 엔터(또는 검색 버튼) 눌렀을 때 실행될 함수
+          />
         </View>
-      ) : (
-        // 검색 결과가 없을 경우
-        searchAttempted && (
-          <Text style={{ color: "#827F7F", marginTop: 50 }}>
-            검색 결과가 없습니다.
-          </Text>
-        )
-      )}
-    </ThemedView>
+
+        <View style={styles.inputView}>
+          <Text style={styles.inputKey}>내 아이디</Text>
+          <Text style={styles.inputValue}>{userId}</Text>
+        </View>
+
+        <View style={styles.line} />
+
+        {/* 검색 결과가 있을 경우 아이디 & 추가 버튼 표시 */}
+        {friendId ? (
+          <View style={styles.rowContainer2}>
+            {/* 프로필 이미지 */}
+            {userProfileImg ? (
+              <Image source={{ uri: userProfileImg }} style={styles.profile} />
+            ) : (
+              <Image
+                source={require("@/assets/images/gyoolTalk.png")}
+                style={styles.profile}
+              />
+            )}
+
+            {/* 아이디 (왼쪽) */}
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={styles.infoText}>{friendId}</Text>
+            </View>
+
+            {/* 추가 버튼 (오른쪽) */}
+            <TouchableOpacity style={styles.addButton} onPress={addFriend}>
+              <ThemedText style={styles.addButtonText}>추가</ThemedText>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          // 검색 결과가 없을 경우
+          searchAttempted && (
+            <Text style={{ color: "#827F7F", marginTop: 50 }}>
+              검색 결과가 없습니다.
+            </Text>
+          )
+        )}
+      </ThemedView>
+    </>
   );
 }

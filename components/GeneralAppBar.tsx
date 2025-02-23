@@ -1,13 +1,16 @@
-import { Dimensions, Image, Text, View } from "react-native";
+import { Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
 
 import { FC, ReactNode } from "react";
+import { useRouter } from "expo-router";
 
-interface SettingAppBarProps {
+interface GeneralAppBarProps {
   title: string;
 }
 
-const SettingAppBar: FC<SettingAppBarProps> = ({ title }) => {
+const GeneralAppBar: FC<GeneralAppBarProps> = ({ title }) => {
   const { width } = Dimensions.get("window");
+
+  const router = useRouter();
   return (
     <View
       style={{
@@ -21,24 +24,27 @@ const SettingAppBar: FC<SettingAppBarProps> = ({ title }) => {
         justifyContent: "space-between",
       }}
     >
-      <Image
-        style={{
-          width: width * 0.072,
-          height: width * 0.05,
-          objectFit: "contain",
-        }}
-      />
+      <TouchableOpacity onPress={() => router.back()}>
+        <Image
+          style={{
+            width: width * 0.072,
+            height: width * 0.05,
+            objectFit: "contain",
+          }}
+          source={require("@/assets/images/icon/left-arrow.png")}
+        />
+      </TouchableOpacity>
       <Text
         style={{
           fontSize: width * 0.05,
           fontFamily: "pretendardSemibold",
         }}
       >
-        설정
+        {title}
       </Text>
       <Image style={{ width: width * 0.072 }} />
     </View>
   );
 };
 
-export default SettingAppBar;
+export default GeneralAppBar;
