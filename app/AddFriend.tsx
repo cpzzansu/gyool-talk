@@ -30,6 +30,7 @@ export default function AddFriend() {
   const { width, height } = Dimensions.get("window");
   const [userProfileImg, setUserProfileImg] = useState<string | null>(null);
   const [searchAttempted, setSearchAttempted] = useState(false); // 검색 여부 추적
+  const [isFriendRequestPending, setIsFriendRequestPending] = useState(false); // 친구 요청 상태
   const imgUrl = "../assets/images/cat.jpg";
 
   const showAlert = (message: string) => {
@@ -57,9 +58,17 @@ export default function AddFriend() {
       if (result.userId != null) {
         setFriendId(result.userId);
         setUserProfileImg(result.userProfileImg || null); // 프로필 이미지 URL 설정
+
+        // 친구 요청 상태 확인
+        if (result.friendRequest) {
+          setIsFriendRequestPending(true);
+        } else {
+          setIsFriendRequestPending(false);
+        }
       } else {
         setFriendId("");
         setUserProfileImg(null); // 프로필 이미지 초기화
+        setIsFriendRequestPending(false); // 검색 결과 없을 경우 상태 초기화
       }
     } catch (error) {
       console.error("친구 검색 오류:", error);
@@ -68,7 +77,7 @@ export default function AddFriend() {
   };
 
   const addFriend = async () => {
-    /*try {
+    try {
       const response = await fetch("http://localhost:8080/user/addFriend", {
         method: "POST",
         headers: {
@@ -79,17 +88,15 @@ export default function AddFriend() {
 
       const result = await response.json();
 
-      if (result.userId != null) {
-        setFriendId(result.userId);
-        setUserProfileImg(result.userProfileImg || null); // 프로필 이미지 URL 설정
+      if (result) {
+        setIsFriendRequestPending(true); // 친구 요청 상태 업데이트
+        showAlert("친구 요청을 보냈습니다.");
       } else {
-        setFriendId("");
-        setUserProfileImg(null); // 프로필 이미지 초기화
+        showAlert("친구 요청에 실패했습니다.");
       }
     } catch (error) {
-      console.error("친구 검색 오류:", error);
-      showAlert("서버 오류가 발생했습니다. 관리자에게 문의하세요.");
-    }*/
+      console.error("친구 추가 오류:", error);
+    }
   };
 
   const styles = StyleSheet.create({
@@ -135,8 +142,8 @@ export default function AddFriend() {
       marginVertical: 2, // 위아래 간격 추가
     },
     addButton: {
-      width: width * 0.15,
-      height: width * 0.1,
+      width: width * 0.13,
+      height: width * 0.09,
       backgroundColor: "#EF7417",
       alignItems: "center",
       justifyContent: "center",
@@ -144,7 +151,7 @@ export default function AddFriend() {
     },
     addButtonText: {
       color: "#F1F1F1",
-      fontSize: width * 0.04,
+      fontSize: width * 0.03,
     },
     rowContainer: {
       flexDirection: "row",
@@ -212,8 +219,14 @@ export default function AddFriend() {
             </View>
 
             {/* 추가 버튼 (오른쪽) */}
-            <TouchableOpacity style={styles.addButton} onPress={addFriend}>
-              <ThemedText style={styles.addButtonText}>추가</ThemedText>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={isFriendRequestPending ? undefined : addFriend} // 요청 중이면 클릭 못 하게 처리
+              disabled={isFriendRequestPending} // 버튼 비활성화
+            >
+              <ThemedText style={styles.addButtonText}>
+                {isFriendRequestPending ? "요청됨" : "추가"}
+              </ThemedText>
             </TouchableOpacity>
           </View>
         ) : (
