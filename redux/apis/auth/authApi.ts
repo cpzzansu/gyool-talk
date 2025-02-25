@@ -25,3 +25,17 @@ export const loginApi = async (user: {
     return error;
   }
 };
+export const joinApi = async (user: {
+  userId: string;
+  userPassword: string;
+  userEmail: string;
+  userNickName: string;
+}) => {
+  try {
+    const response = await api.post("/join/joinUser", user);
+    return response;
+  } catch (error: any) {
+    console.log(`Error Message: ${error}`);
+    return error;
+  }
+};
