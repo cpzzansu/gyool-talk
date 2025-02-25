@@ -13,9 +13,13 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useState } from "react";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { join, login } from "@/redux/slices/auth/authThunk";
+import { AppDispatch } from "@/redux/store";
 
 export default function LoginScreen() {
   const { width, height } = Dimensions.get("window");
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter(); // 페이지 이동을 위한 useRouter 사용
   const [userId, setUserId] = useState(""); // 아이디 상태 관리
   const [password, setPassword] = useState(""); // 비밀번호 상태 관리
@@ -108,50 +112,45 @@ export default function LoginScreen() {
   //닉네임 길이 확인
   const maxLength = 16;
   //회원가입
-  const join = () => {
+  const joinCheck = async () => {
     let header = "회원가입";
     let message = "완료되었습니다.";
     if (userId.trim() == "") {
       message = "아이디를 입력하세요";
-    } else if (isDuplicate == null) {
-      message = "아이디 중복확인 해주세요";
-    } else if (password.trim() == "") {
-      message = "비밀번호를 입력해주세요";
-    } else if (passwordChk.trim() == "") {
-      message = "비밀번호 확인 입력해주세요";
-    } else if (password.trim() != passwordChk.trim()) {
-      message = "비밀번호가 일치 하지 않습니다";
-    } else if (!isConfirm) {
-      message = "이메일 인증이 필요합니다";
-    } else if (isCorrect == null) {
-      message = "인증번호 확인이 필요합니다";
-    } else if (nickname == "") {
-      message = "닉네임을 입력해주세요";
-    } else {
-      axios
-        .post("http://localhost:8080/join/joinUser", {
-          userId: userId,
-          userPassword: password,
-          userEmail: email,
-          userNickName: nickname,
-        })
-        .then(function (resp: any) {
-          if (resp.data) {
-            console.log("회원가입 완료");
-            router.push("/Login");
-            //라우팅 로그인 페이지
-          } else {
-            message = "잠시 후 다시 시도해주세요";
-          }
-        })
-        .catch(function (err: any) {
-          console.log(`Error Message: ${err}`);
-        });
+    }
+    // else if (isDuplicate == null) {
+    //   message = "아이디 중복확인 해주세요";
+    // } else if (password.trim() == "") {
+    //   message = "비밀번호를 입력해주세요";
+    // } else if (passwordChk.trim() == "") {
+    //   message = "비밀번호 확인 입력해주세요";
+    // } else if (password.trim() != passwordChk.trim()) {
+    //   message = "비밀번호가 일치 하지 않습니다";
+    // } else if (!isConfirm) {
+    //   message = "이메일 인증이 필요합니다";
+    // } else if (isCorrect == null) {
+    //   message = "인증번호 확인이 필요합니다";
+    // } else if (nickname == "") {
+    //   message = "닉네임을 입력해주세요";
+    // }
+    else {
+      handlejoin();
     }
 
     showAlert(header, message);
   };
-
+  const handlejoin = async () => {
+    dispatch(
+      join({
+        user: {
+          userId,
+          userPassword: password,
+          userEmail: email,
+          userNickName: nickname,
+        },
+      }),
+    );
+  };
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -346,7 +345,7 @@ export default function LoginScreen() {
           </Text>
         </ThemedView>
         {/*회원가입 버튼*/}
-        <TouchableOpacity style={styles.joinButton} onPress={join}>
+        <TouchableOpacity style={styles.joinButton} onPress={joinCheck}>
           <ThemedText style={styles.joinButtonText}>회원가입</ThemedText>
         </TouchableOpacity>
       </ThemedView>

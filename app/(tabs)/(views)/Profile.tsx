@@ -18,13 +18,35 @@ import { useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { RootState } from "@/redux/reducer";
 import GeneralAppBar from "@/components/GeneralAppBar";
+import * as ImagePicker from "expo-image-picker";
 
 export default function LoginScreen() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+  const [image, setImage] = useState("");
+  const selectImg = async () => {
+    //권한 요청
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("권한 필요", "사진첩 접근을 허용해야 합니다.");
+      return;
+    }
+
+    // 사진 선택
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      console.log(result.assets[0]);
+      setImage(result.assets[0].uri); // 선택한 이미지 설정
+    }
+  };
 
   const [isProfile, setIsprofile] = useState(false);
-  const [password, setPassword] = useState(""); // 비밀번호 상태 관리
   const { width, height } = Dimensions.get("window");
 
   const userId = useSelector((state: RootState) => state.auth.userId);
@@ -32,12 +54,7 @@ export default function LoginScreen() {
     (state: RootState) => state.auth.userNickname,
   );
   const userEmail = useSelector((state: RootState) => state.auth.userEmail);
-  //todo 폰 접근 사진 가져오기 기능
-  const selectImg = () => {
-    setIsprofile(!isProfile);
-    console.log("폰저장 사진 가져오기 기능 추가 예졍");
-  };
-  const imgUrl = "../../../assets/images/cat.jpg";
+
   const updateNickName = () => {
     router.push("/Nickname");
   };
@@ -127,14 +144,12 @@ export default function LoginScreen() {
         <View>
           {/* 로고 */}
           <TouchableOpacity onPress={selectImg}>
-            <Image
-              source={
-                isProfile
-                  ? require(imgUrl)
-                  : require("@/assets/images/gyoolTalk.png")
-              }
-              style={isProfile ? styles.profileImg : styles.logo}
-            />
+            {image && (
+              <Image
+                source={{ uri: image }}
+                style={{ width: 200, height: 200, marginTop: 20 }}
+              />
+            )}
             <View style={styles.camera}>
               <Image
                 style={styles.icon}
