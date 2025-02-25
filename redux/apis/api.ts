@@ -6,8 +6,15 @@ const instance = axios.create({
 });
 
 instance.interceptors.request.use(
-  (config) => {
-    config.headers.Authorization = `Bearer token`;
+  async (config) => {
+    const { default: store } = await import("../store");
+
+    const token = store.getState().auth.token;
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     return config;
   },
   (error) => {
