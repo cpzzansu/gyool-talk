@@ -12,19 +12,14 @@ import {
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useState } from "react";
-import { useRouter } from "expo-router";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "@/redux/slices/auth/authThunk";
-import { AppDispatch, RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 import GeneralAppBar from "@/components/GeneralAppBar";
+import * as common from "@/utils/common";
 
 export default function AddFriend() {
-  const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
-
   // 리덕스 상태에서 userId 가져오기
   const userId = useSelector((state: RootState) => state.auth.userId);
-
   const [selectId, setSelectId] = useState("");
   const [friendId, setFriendId] = useState("");
   const { width, height } = Dimensions.get("window");
@@ -45,26 +40,14 @@ export default function AddFriend() {
     setSearchAttempted(true); // 검색 시도 상태 변경
 
     try {
-      const response = await fetch("http://localhost:8080/user/findId", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: selectId }),
+      const result = await common.postRequest("/user/findId", {
+        userId: selectId,
       });
 
-      const result = await response.json();
-
-      if (result.userId != null) {
+      if (result.userId) {
         setFriendId(result.userId);
         setUserProfileImg(result.userProfileImg || null); // 프로필 이미지 URL 설정
-
-        // 친구 요청 상태 확인
-        if (result.friendRequest) {
-          setIsFriendRequestPending(true);
-        } else {
-          setIsFriendRequestPending(false);
-        }
+        setIsFriendRequestPending(!!result.friendRequest); // 친구 요청 상태 설정
       } else {
         setFriendId("");
         setUserProfileImg(null); // 프로필 이미지 초기화
@@ -78,15 +61,11 @@ export default function AddFriend() {
 
   const addFriend = async () => {
     try {
-      const response = await fetch("http://localhost:8080/user/addFriend", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: userId, friendId: friendId, status: 0 }),
+      const result = await common.postRequest("/user/addFriend", {
+        userId,
+        friendId,
+        status: 0,
       });
-
-      const result = await response.json();
 
       if (result) {
         setIsFriendRequestPending(true); // 친구 요청 상태 업데이트
@@ -96,6 +75,7 @@ export default function AddFriend() {
       }
     } catch (error) {
       console.error("친구 추가 오류:", error);
+      showAlert("서버 오류가 발생했습니다. 관리자에게 문의하세요.");
     }
   };
 
