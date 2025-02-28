@@ -9,7 +9,6 @@ import {
   Platform,
   Dimensions,
 } from "react-native";
-import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useState } from "react";
 import { useRouter } from "expo-router";
@@ -17,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "@/redux/slices/auth/authThunk";
 import { AppDispatch, RootState } from "@/redux/store";
 import GeneralAppBar from "@/components/GeneralAppBar";
+import { ThemedView } from "@/components/ThemedView";
 
 export default function AddFriend() {
   const router = useRouter();

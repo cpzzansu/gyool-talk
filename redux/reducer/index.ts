@@ -1,10 +1,11 @@
 // src/store/rootReducer.ts
 import { combineReducers } from "@reduxjs/toolkit";
 import authSlice from "@/redux/slices/auth/authSlice";
+import friendSlice from "@/redux/slices/friend/friendSlice";
 
 const rootReducer = combineReducers({
   auth: authSlice,
-  // 다른 슬라이스가 있다면 추가
+  friend: friendSlice,
 });
 
 export default rootReducer;

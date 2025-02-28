@@ -8,8 +8,11 @@ import {
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import TabsScreenAppBar from "@/components/TabsScreenAppBar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { AppDispatch } from "@/redux/store";
+import { fetchFriendList } from "@/redux/slices/friend/friendThunk";
 
 const data = {
   nickname: "내 아이디",
@@ -24,7 +27,13 @@ const data = {
 };
 
 const FirstView = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
   const { width } = Dimensions.get("window");
+
+  useEffect(() => {
+    dispatch(fetchFriendList());
+  }, [dispatch]);
 
   const { userNickname } = useSelector((state: any) => state.auth);
 
