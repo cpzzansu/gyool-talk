@@ -11,19 +11,18 @@ import {
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { login } from "@/redux/slices/auth/authThunk";
 import { AppDispatch } from "@/redux/store";
 
 export default function LoginScreen() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-
   const [userId, setUserId] = useState(""); // 아이디 상태 관리
   const [password, setPassword] = useState(""); // 비밀번호 상태 관리
-  const { width, height } = Dimensions.get("window");
+  const { width } = Dimensions.get("window");
 
   const showAlert = (title: string, message: string) => {
     if (Platform.OS === "web") {
@@ -58,7 +57,12 @@ export default function LoginScreen() {
   // };
 
   const handleLogin = async () => {
-    dispatch(login({ user: { userId, userPassword: password } }));
+    try {
+      // 로그인 요청
+      await dispatch(login({ user: { userId, userPassword: password } }));
+    } catch (error) {
+      console.error("로그인 실패:", error);
+    }
   };
 
   const snsLogin = (sns: string) => {
@@ -92,7 +96,7 @@ export default function LoginScreen() {
       resizeMode: "contain", // 원본 비율 유지
     },
     input: {
-      width: width * 0.9, // ✅ width, height를 여기서 사용
+      width: width * 0.9,
       height: width * 0.1,
       borderRadius: 3,
       paddingHorizontal: width * 0.03,

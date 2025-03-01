@@ -7,14 +7,19 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   async (config) => {
-    const { default: store } = await import("../store.ts");
+    const { default: store } = await import("../store");
+
     const token = store.getState().auth.token;
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => {
+    return Promise.reject(error);
+  },
 );
 
 instance.interceptors.response.use(

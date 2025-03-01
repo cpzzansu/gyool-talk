@@ -9,27 +9,23 @@ import {
   Platform,
   Dimensions,
 } from "react-native";
+import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useState } from "react";
-import { useRouter } from "expo-router";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "@/redux/slices/auth/authThunk";
-import { AppDispatch, RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 import GeneralAppBar from "@/components/GeneralAppBar";
-import { ThemedView } from "@/components/ThemedView";
+import * as common from "@/utils/common";
 
 export default function AddFriend() {
-  const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
-
   // 리덕스 상태에서 userId 가져오기
   const userId = useSelector((state: RootState) => state.auth.userId);
-
   const [selectId, setSelectId] = useState("");
   const [friendId, setFriendId] = useState("");
   const { width, height } = Dimensions.get("window");
   const [userProfileImg, setUserProfileImg] = useState<string | null>(null);
   const [searchAttempted, setSearchAttempted] = useState(false); // 검색 여부 추적
+  const [isFriendRequestPending, setIsFriendRequestPending] = useState(false); // 친구 요청 상태
   const imgUrl = "../assets/images/cat.jpg";
 
   const showAlert = (message: string) => {
@@ -44,22 +40,18 @@ export default function AddFriend() {
     setSearchAttempted(true); // 검색 시도 상태 변경
 
     try {
-      const response = await fetch("http://localhost:8080/user/findId", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: selectId }),
+      const result = await common.postRequest("/user/findId", {
+        userId: selectId,
       });
 
-      const result = await response.json();
-
-      if (result.userId != null) {
+      if (result.userId) {
         setFriendId(result.userId);
         setUserProfileImg(result.userProfileImg || null); // 프로필 이미지 URL 설정
+        setIsFriendRequestPending(!!result.friendRequest); // 친구 요청 상태 설정
       } else {
         setFriendId("");
         setUserProfileImg(null); // 프로필 이미지 초기화
+        setIsFriendRequestPending(false); // 검색 결과 없을 경우 상태 초기화
       }
     } catch (error) {
       console.error("친구 검색 오류:", error);
@@ -68,28 +60,23 @@ export default function AddFriend() {
   };
 
   const addFriend = async () => {
-    /*try {
-      const response = await fetch("http://localhost:8080/user/addFriend", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: userId, friendId: friendId, status: 0 }),
+    try {
+      const result = await common.postRequest("/user/addFriend", {
+        userId,
+        friendId,
+        status: 0,
       });
 
-      const result = await response.json();
-
-      if (result.userId != null) {
-        setFriendId(result.userId);
-        setUserProfileImg(result.userProfileImg || null); // 프로필 이미지 URL 설정
+      if (result) {
+        setIsFriendRequestPending(true); // 친구 요청 상태 업데이트
+        showAlert("친구 요청을 보냈습니다.");
       } else {
-        setFriendId("");
-        setUserProfileImg(null); // 프로필 이미지 초기화
+        showAlert("친구 요청에 실패했습니다.");
       }
     } catch (error) {
-      console.error("친구 검색 오류:", error);
+      console.error("친구 추가 오류:", error);
       showAlert("서버 오류가 발생했습니다. 관리자에게 문의하세요.");
-    }*/
+    }
   };
 
   const styles = StyleSheet.create({
@@ -135,8 +122,8 @@ export default function AddFriend() {
       marginVertical: 2, // 위아래 간격 추가
     },
     addButton: {
-      width: width * 0.15,
-      height: width * 0.1,
+      width: width * 0.13,
+      height: width * 0.09,
       backgroundColor: "#EF7417",
       alignItems: "center",
       justifyContent: "center",
@@ -144,7 +131,7 @@ export default function AddFriend() {
     },
     addButtonText: {
       color: "#F1F1F1",
-      fontSize: width * 0.04,
+      fontSize: width * 0.03,
     },
     rowContainer: {
       flexDirection: "row",
@@ -212,8 +199,14 @@ export default function AddFriend() {
             </View>
 
             {/* 추가 버튼 (오른쪽) */}
-            <TouchableOpacity style={styles.addButton} onPress={addFriend}>
-              <ThemedText style={styles.addButtonText}>추가</ThemedText>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={isFriendRequestPending ? undefined : addFriend} // 요청 중이면 클릭 못 하게 처리
+              disabled={isFriendRequestPending} // 버튼 비활성화
+            >
+              <ThemedText style={styles.addButtonText}>
+                {isFriendRequestPending ? "요청됨" : "추가"}
+              </ThemedText>
             </TouchableOpacity>
           </View>
         ) : (
