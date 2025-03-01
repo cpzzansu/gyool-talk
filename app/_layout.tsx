@@ -15,6 +15,7 @@ import { StyleSheet } from "react-native";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -54,29 +55,48 @@ export default function RootLayout() {
     };
   };
 
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 3, // 3회 재시도
+        staleTime: 5 * 60 * 1000, // 5분 마다 데이터 갱신
+        refetchOnWindowFocus: true,
+      },
+    },
+  });
+
   return (
     <Provider store={store}>
       <PersistGate loading={false} persistor={persistor}>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="Login" options={screenOptions("로그인")} />
-            <Stack.Screen name="Join" options={screenOptions("회원가입")} />
-            <Stack.Screen
-              name="FindId"
-              options={screenOptions("아이디 찾기")}
-            />
-            <Stack.Screen
-              name="ResetPw"
-              options={screenOptions("비밀번호 재설정")}
-            />
-            <Stack.Screen name={"AddFriend"} options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="Login" options={screenOptions("로그인")} />
+              <Stack.Screen name="Join" options={screenOptions("회원가입")} />
+              <Stack.Screen
+                name="FindId"
+                options={screenOptions("아이디 찾기")}
+              />
+              <Stack.Screen
+                name="ResetPw"
+                options={screenOptions("비밀번호 재설정")}
+              />
+              <Stack.Screen
+                name={"AddFriend"}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name={"chattingList/AddChatting"}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </QueryClientProvider>
       </PersistGate>
     </Provider>
   );

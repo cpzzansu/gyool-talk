@@ -8,14 +8,9 @@ import {
   Text,
 } from "react-native";
 
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import { useSelector } from "react-redux";
 import TabsScreenAppBar from "@/components/TabsScreenAppBar";
+import { useRouter } from "expo-router";
 
 const data = [
   {
@@ -49,14 +44,23 @@ const data = [
 ];
 export default function TabTwoScreen() {
   const { width } = Dimensions.get("window");
+  const router = useRouter();
 
   return (
     <>
       <TabsScreenAppBar
         title={"채팅"}
         icons={[
-          { src: require("@/assets/images/icon/chatting-search-icon.png") },
-          { src: require("@/assets/images/icon/add-chatting.png") },
+          {
+            src: require("@/assets/images/icon/chatting-search-icon.png"),
+            onPress: () => {},
+          },
+          {
+            src: require("@/assets/images/icon/add-chatting.png"),
+            onPress: () => {
+              router.push("/chattingList/AddChatting");
+            },
+          },
         ]}
       />
       <ScrollView style={{ backgroundColor: "#DCD7CB" }}>

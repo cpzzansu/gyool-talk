@@ -1,10 +1,7 @@
 import api from "../api";
+import { Friend } from "@/types/friend";
 
-export const fetchFriendListApi = async () => {
-  try {
-    const response = await api.get("/friend/fetchFriendList");
-    return response.data;
-  } catch (error: any) {
-    return error;
-  }
+export const fetchFriendListApi = async (): Promise<Friend[]> => {
+  const response = await api.get("/friend/fetchFriendList");
+  return response.data;
 };
