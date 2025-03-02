@@ -15,7 +15,9 @@ const AddChatting = () => {
 
   return (
     <>
+      {/*채팅추가 앱바*/}
       <GeneralAppBar title={"대화상대 선택"} />
+      {/*친구 목록*/}
       <ScrollView
         style={{
           backgroundColor: "#DCD7CB",
