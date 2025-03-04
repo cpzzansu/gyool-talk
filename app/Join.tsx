@@ -14,7 +14,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { join, login } from "@/redux/slices/auth/authThunk";
+import { join } from "@/redux/slices/auth/authThunk";
 import { AppDispatch } from "@/redux/store";
 
 export default function LoginScreen() {
@@ -70,7 +70,7 @@ export default function LoginScreen() {
       return;
     }
     axios
-      .post("http://localhost:8080/api/user/confirmEmail", { email: email })
+      .post("http://localhost:8080/user/confirmEmail", { email: email })
       .then(function (resp: any) {
         console.log(resp.data);
         if (resp.data) {
@@ -117,30 +117,29 @@ export default function LoginScreen() {
     let message = "완료되었습니다.";
     if (userId.trim() == "") {
       message = "아이디를 입력하세요";
-    }
-    // else if (isDuplicate == null) {
-    //   message = "아이디 중복확인 해주세요";
-    // } else if (password.trim() == "") {
-    //   message = "비밀번호를 입력해주세요";
-    // } else if (passwordChk.trim() == "") {
-    //   message = "비밀번호 확인 입력해주세요";
-    // } else if (password.trim() != passwordChk.trim()) {
-    //   message = "비밀번호가 일치 하지 않습니다";
-    // } else if (!isConfirm) {
-    //   message = "이메일 인증이 필요합니다";
-    // } else if (isCorrect == null) {
-    //   message = "인증번호 확인이 필요합니다";
-    // } else if (nickname == "") {
-    //   message = "닉네임을 입력해주세요";
-    // }
-    else {
+    } else if (isDuplicate == null) {
+      message = "아이디 중복확인 해주세요";
+    } else if (password.trim() == "") {
+      message = "비밀번호를 입력해주세요";
+    } else if (passwordChk.trim() == "") {
+      message = "비밀번호 확인 입력해주세요";
+    } else if (password.trim() != passwordChk.trim()) {
+      message = "비밀번호가 일치 하지 않습니다";
+    } else if (!isConfirm) {
+      message = "이메일 인증이 필요합니다";
+    } else if (isCorrect == null) {
+      message = "인증번호 확인이 필요합니다";
+    } else if (nickname == "") {
+      message = "닉네임을 입력해주세요";
+    } else {
       handlejoin();
     }
 
     showAlert(header, message);
   };
+
   const handlejoin = async () => {
-    dispatch(
+    const result = await dispatch(
       join({
         user: {
           userId,
@@ -150,7 +149,15 @@ export default function LoginScreen() {
         },
       }),
     );
+
+    // 📌 회원가입 성공 시, 특정 페이지로 이동
+    if (result.payload.data === true) {
+      router.push("/Login"); // 회원가입 성공 후 이동
+    } else {
+      alert("회원가입에 실패했습니다.");
+    }
   };
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
