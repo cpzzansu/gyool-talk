@@ -41,12 +41,11 @@ export default function LoginScreen() {
     });
 
     if (!result.canceled) {
-      console.log(result.assets[0]);
-      setImage(result.assets[0].uri); // 선택한 이미지 설정
+      setImage(result.assets[0].uri);
+      //이미지 서버저장
     }
   };
 
-  const [isProfile, setIsprofile] = useState(false);
   const { width, height } = Dimensions.get("window");
 
   const userId = useSelector((state: RootState) => state.auth.userId);
@@ -144,10 +143,12 @@ export default function LoginScreen() {
         <View>
           {/* 로고 */}
           <TouchableOpacity onPress={selectImg}>
-            {image && (
+            {image ? (
+              <Image source={{ uri: image }} style={styles.profileImg} />
+            ) : (
               <Image
-                source={{ uri: image }}
-                style={{ width: 200, height: 200, marginTop: 20 }}
+                source={require("@/assets/images/gyoolTalk.png")}
+                style={styles.logo}
               />
             )}
             <View style={styles.camera}>
