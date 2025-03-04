@@ -18,18 +18,32 @@ import { useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { RootState } from "@/redux/reducer";
 import GeneralAppBar from "@/components/GeneralAppBar";
+import { updateNickName } from "@/redux/slices/auth/authThunk";
 
 export default function updateScreen() {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const { width } = Dimensions.get("window");
   const maxLength = 16;
   const userNickname = useSelector(
     (state: RootState) => state.auth.userNickname,
   );
   const [nickname, setUserNickname] = useState(userNickname);
-  const updateNickname = () => {
-    console.log("닉네임업데이트 로직 추가");
+  const userId = useSelector((state: RootState) => state.auth.userId);
+
+  const update = async () => {
     console.log(nickname, "변경 닉네임");
+
+    const result = await dispatch(
+      updateNickName({
+        user: {
+          userId: userId,
+          userNickName: nickname,
+        },
+      }),
+    );
+    alert("닉네임이 변경 됐습니다.");
+    router.push("/Profile");
   };
   const handleNicknameChange = (text: string) => {
     if (text.length <= maxLength) {
@@ -87,10 +101,7 @@ export default function updateScreen() {
           <Text style={styles.maxLength}>
             {nickname.length}/{maxLength} {/* 현재 길이 / 최대 길이 표시 */}
           </Text>
-          <TouchableOpacity
-            style={styles.updateButton}
-            onPress={updateNickname}
-          >
+          <TouchableOpacity style={styles.updateButton} onPress={update}>
             <ThemedText style={styles.updateButtonText}>변경</ThemedText>
           </TouchableOpacity>
         </View>

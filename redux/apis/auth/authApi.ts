@@ -39,3 +39,15 @@ export const joinApi = async (user: {
     return error;
   }
 };
+export const updateNickNameApi = async (user: {
+  userId: string;
+  userNickName: string;
+}) => {
+  try {
+    const response = await api.post("/user/upDateNickName", user);
+    return response;
+  } catch (error: any) {
+    console.log(`Error Message: ${error}`);
+    return error;
+  }
+};
