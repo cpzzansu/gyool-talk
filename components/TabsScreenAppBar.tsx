@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { FC, ReactNode } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface IconItem {
   src: ImageSourcePropType;
@@ -20,13 +21,14 @@ interface TabsScreenAppBarProps {
 }
 
 const TabsScreenAppBar: FC<TabsScreenAppBarProps> = ({ title, icons }) => {
+  const insets = useSafeAreaInsets();
   const { width } = Dimensions.get("window");
   return (
     <View
       style={{
         backgroundColor: "#DCD7CB",
-        paddingTop: width * 0.2,
-        paddingBottom: width * 0.05,
+        paddingTop: insets.top,
+        height: width * 0.35,
         paddingLeft: width * 0.045,
         paddingRight: width * 0.045,
         flexDirection: "row",

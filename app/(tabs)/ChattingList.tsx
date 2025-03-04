@@ -11,39 +11,19 @@ import {
 import { ThemedView } from "@/components/ThemedView";
 import TabsScreenAppBar from "@/components/TabsScreenAppBar";
 import { useRouter } from "expo-router";
+import {
+  Chatroom,
+  fetchChatroomApi,
+} from "@/redux/apis/chattingList/chattingListApi";
+import { useQuery } from "@tanstack/react-query";
 
-const data = [
-  {
-    chatroomName: "채팅방1",
-    messages: [{ content: "마지막 채팅 내용1", timestamp: "2025.02.20" }],
-  },
-  {
-    chatroomName: "채팅방2",
-    messages: [{ content: "마지막 채팅 내용2", timestamp: "2025.02.20" }],
-  },
-  {
-    chatroomName: "채팅방3",
-    messages: [{ content: "마지막 채팅 내용3", timestamp: "2025.02.20" }],
-  },
-  {
-    chatroomName: "채팅방4",
-    messages: [{ content: "마지막 채팅 내용4", timestamp: "2025.02.20" }],
-  },
-  {
-    chatroomName: "채팅방5",
-    messages: [{ content: "마지막 채팅 내용5", timestamp: "2025.02.20" }],
-  },
-  {
-    chatroomName: "채팅방6",
-    messages: [{ content: "마지막 채팅 내용6", timestamp: "2025.02.20" }],
-  },
-  {
-    chatroomName: "채팅방7",
-    messages: [{ content: "마지막 채팅 내용7", timestamp: "2025.02.20" }],
-  },
-];
+const { width } = Dimensions.get("window");
 export default function TabTwoScreen() {
-  const { width } = Dimensions.get("window");
+  const { data, isLoading, error } = useQuery<Chatroom[]>({
+    queryKey: ["chatroom"],
+    queryFn: fetchChatroomApi,
+  });
+
   const router = useRouter();
 
   return (
@@ -75,18 +55,24 @@ export default function TabTwoScreen() {
           }}
         >
           {/*친구 목록*/}
-          {data.map((chat, index) => {
-            const message = chat.messages.pop();
-            return (
-              <ListItem
-                chatroomName={chat.chatroomName}
-                lastMessage={message?.content!}
-                timestamp={message?.timestamp!}
-                marginBottom={0.05}
-                key={index}
-              />
-            );
-          })}
+          {data &&
+            data.length > 0 &&
+            data.map((chat, index) => {
+              if (chat.messages.length <= 0) {
+                return null;
+              }
+
+              const message = chat.messages.pop();
+              return (
+                <ListItem
+                  chatroomName={chat.chatroomName}
+                  lastMessage={message?.content!}
+                  timestamp={message?.timestamp!}
+                  marginBottom={0.05}
+                  key={index}
+                />
+              );
+            })}
         </ThemedView>
       </ScrollView>
     </>
@@ -97,13 +83,13 @@ export default function TabTwoScreen() {
 const ListItem = ({
   chatroomName,
   lastMessage,
-  marginBottom,
   timestamp,
+  marginBottom,
 }: {
   chatroomName: string;
   lastMessage: string;
-  marginBottom: number;
   timestamp: string;
+  marginBottom: number;
 }) => {
   const { width } = Dimensions.get("window");
 
