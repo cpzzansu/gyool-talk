@@ -92,6 +92,10 @@ export default function RootLayout() {
                 name={"chattingList/AddChatting"}
                 options={{ headerShown: false }}
               />
+              <Stack.Screen
+                name={"chattingList/ChatRoom"}
+                options={{ headerShown: false }}
+              />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />

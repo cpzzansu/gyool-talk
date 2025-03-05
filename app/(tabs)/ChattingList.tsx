@@ -6,6 +6,7 @@ import {
   ScrollView,
   View,
   Text,
+  TouchableOpacity,
 } from "react-native";
 
 import { ThemedView } from "@/components/ThemedView";
@@ -58,19 +59,33 @@ export default function TabTwoScreen() {
           {data &&
             data.length > 0 &&
             data.map((chat, index) => {
-              if (chat.messages.length <= 0) {
+              if (chat.messages.length < 0) {
                 return null;
               }
 
               const message = chat.messages.pop();
               return (
-                <ListItem
-                  chatroomName={chat.chatroomName}
-                  lastMessage={message?.content!}
-                  timestamp={message?.timestamp!}
-                  marginBottom={0.05}
-                  key={index}
-                />
+                <TouchableOpacity
+                  key={index} // 키 추가
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginBottom: width * 0.05,
+                  }}
+                  onPress={() =>
+                    router.push(`/chattingList/ChatRoom?id=${chat.id}`)
+                  }
+                >
+                  <ListItem
+                    chatroomId={chat.id}
+                    chatroomName={chat.chatroomName}
+                    lastMessage={message?.content!}
+                    timestamp={message?.timestamp!}
+                    marginBottom={0.05}
+                    key={index}
+                  />
+                </TouchableOpacity>
               );
             })}
         </ThemedView>
@@ -81,11 +96,13 @@ export default function TabTwoScreen() {
 
 // 친구 목록 아이템 컴포넌트
 const ListItem = ({
+  chatroomId,
   chatroomName,
   lastMessage,
   timestamp,
   marginBottom,
 }: {
+  chatroomId: number;
   chatroomName: string;
   lastMessage: string;
   timestamp: string;
