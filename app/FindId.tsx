@@ -44,7 +44,7 @@ export default function LoginScreen() {
       color: "#727272",
     },
     input: {
-      width: width * 0.9,
+      width: width * 0.8,
       height: width * 0.1,
       borderRadius: 3,
       paddingHorizontal: width * 0.03,
@@ -60,7 +60,7 @@ export default function LoginScreen() {
     },
     authButtonText: {
       color: "#F1F1F1",
-      fontSize: width * 0.04,
+      fontSize: width * 0.035,
     },
     findButton: {
       width: "100%",

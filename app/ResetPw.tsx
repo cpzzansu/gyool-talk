@@ -53,7 +53,7 @@ export default function LoginScreen() {
       marginBottom: width * 0.03,
     },
     input2: {
-      width: width * 0.9,
+      width: width * 0.8,
       height: width * 0.1,
       borderRadius: 3,
       paddingHorizontal: width * 0.03,
@@ -117,7 +117,6 @@ export default function LoginScreen() {
     buttonText: {
       color: "#F1F1F1",
       fontSize: width * 0.035,
-      fontWeight: "bold",
     },
     rowContainer3: {
       flexDirection: "row",
