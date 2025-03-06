@@ -19,13 +19,29 @@ import { AppDispatch } from "@/redux/store";
 import { RootState } from "@/redux/reducer";
 import GeneralAppBar from "@/components/GeneralAppBar";
 import * as ImagePicker from "expo-image-picker";
+import { useMutation } from "@tanstack/react-query";
+import { uploadProfileimgApi } from "@/redux/apis/file/fileApi";
 
 export default function LoginScreen() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const [image, setImage] = useState("");
+
+  // useMutation을 컴포넌트 레벨에서 호출합니다.
+  const mutation = useMutation({
+    mutationFn: async ({ uri, userId }: { uri: string; userId: string }) => {
+      return await uploadProfileimgApi(uri, userId);
+    },
+    onSuccess: () => {
+      Alert.alert("성공", "이미지가 업로드되었습니다.");
+    },
+    onError: () => {
+      Alert.alert("실패", "이미지 업로드에 실패했습니다.");
+    },
+  });
+  const userId = useSelector((state: RootState) => state.auth.userId);
   const selectImg = async () => {
-    //권한 요청
+    // 권한 요청
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("권한 필요", "사진첩 접근을 허용해야 합니다.");
@@ -41,14 +57,17 @@ export default function LoginScreen() {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      //이미지 서버저장
+      setImage(result.assets[0].uri); // 선택된 이미지 URI 업데이트
+      // mutate를 사용하여 업로드 수행
+      mutation.mutate({
+        uri: result.assets[0].uri,
+        userId: userId,
+      });
     }
   };
 
   const { width, height } = Dimensions.get("window");
 
-  const userId = useSelector((state: RootState) => state.auth.userId);
   const userNickname = useSelector(
     (state: RootState) => state.auth.userNickname,
   );
@@ -159,7 +178,7 @@ export default function LoginScreen() {
             </View>
           </TouchableOpacity>
         </View>
-        {/* 닉네임  확인*/}
+        {/* 닉네임 확인 */}
         <TouchableOpacity onPress={updateNickName}>
           <View style={styles.inputView}>
             <Text style={styles.inputKey}>닉네임</Text>
@@ -169,12 +188,12 @@ export default function LoginScreen() {
             <Image source={require("@/assets/images/icon/right-arrow.png")} />
           </View>
         </TouchableOpacity>
-        {/* 아이디  확인*/}
+        {/* 아이디 확인 */}
         <View style={styles.inputView}>
           <Text style={styles.inputKey}>아이디</Text>
           <Text style={styles.inputValue}>{userId}</Text>
         </View>
-        {/* 이메일  확인*/}
+        {/* 이메일 확인 */}
         <View style={styles.inputView}>
           <Text style={styles.inputKey}>이메일</Text>
           <Text style={styles.inputValue}>{userEmail}</Text>
