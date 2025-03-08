@@ -14,6 +14,13 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { RootState } from "@/redux/reducer";
+import ActionSheet, { SheetManager } from "react-native-actions-sheet";
+import { useMutation } from "@tanstack/react-query";
+import {
+  Chatroom,
+  CreateChatting,
+  createChattingApi,
+} from "@/redux/apis/chattingList/chattingListApi";
 
 // const data = {
 //   nickname: "내 아이디",
@@ -34,10 +41,34 @@ const FirstView = () => {
     (state: any) => state.auth,
   );
   const [friendsList, setFriendsList] = useState<any[]>([]);
-
+  const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null); // 추가: 선택된 친구 ID
   const router = useRouter();
   const goProfile = () => {
     router.push("/Profile");
+  };
+
+  // ActionSheet 열기
+  const openActionSheet = (friendId: string) => {
+    setSelectedFriendId(friendId); // 친구 ID를 상태에 저장
+    SheetManager.show("friendOptions", { friendId: friendId } as any);
+  };
+
+  // 채팅방 생성 뮤테이션
+  const mutation = useMutation<Chatroom, Error, CreateChatting>({
+    mutationFn: createChattingApi,
+    onSuccess: (data) => {
+      console.log("채팅방 생성 성공:", data);
+    },
+    onError: (error) => {
+      console.error("채팅방 생성 실패:", error);
+    },
+  });
+
+  // 채팅방 생성 버튼 클릭 시 호출되는 함수
+  const handleAddChattingClick = () => {
+    if (selectedFriendId) {
+      mutation.mutate({ friendId: selectedFriendId }); // 선택된 친구 ID로 채팅방 생성
+    }
   };
 
   useEffect(() => {
@@ -106,12 +137,10 @@ const FirstView = () => {
               marginBottom={0.063}
             />
           </TouchableOpacity>
-
           {/*구분선*/}
           <View
             style={{ borderBottomWidth: 1, borderBottomColor: "#e4e4e4" }}
           />
-
           {/*친구 수*/}
           <View style={{ marginTop: width * 0.034 }}>
             <Text
@@ -125,15 +154,27 @@ const FirstView = () => {
             </Text>
           </View>
 
-          {/*친구 목록*/}
-          {friendsList.map((friend, index) => (
-            <ListItem
-              id={friend.userNickName}
-              profileImg={friend.userProfileImg}
-              marginBottom={0.05}
-              key={index}
-            />
+          {/* 친구 목록 */}
+          {friendsList.map((friend) => (
+            <TouchableOpacity
+              key={friend.userId}
+              onPress={() => openActionSheet(friend.userId)} // 친구 클릭 시 친구 ID 전달
+            >
+              <ListItem
+                id={friend.userNickName}
+                profileImg={friend.userProfileImg}
+                marginBottom={0.05}
+              />
+            </TouchableOpacity>
           ))}
+
+          <ActionSheet id="friendOptions">
+            <View style={{ padding: 20 }}>
+              <TouchableOpacity onPress={handleAddChattingClick}>
+                <Text style={{ fontSize: 18 }}>대화하기</Text>
+              </TouchableOpacity>
+            </View>
+          </ActionSheet>
         </ThemedView>
       </ScrollView>
     </>
