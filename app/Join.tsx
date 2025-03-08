@@ -70,7 +70,7 @@ export default function LoginScreen() {
       return;
     }
     axios
-      .post("http://localhost:8080/user/confirmEmail", { email: email })
+      .post("http://localhost:8080/user/confirmEmail", { userEmail: email })
       .then(function (resp: any) {
         console.log(resp.data);
         if (resp.data) {
