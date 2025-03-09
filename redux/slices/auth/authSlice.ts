@@ -8,6 +8,7 @@ export interface AuthState {
   token: string | null;
   isAuthorized: boolean;
   userEmail: string;
+  userProfileImg: string;
 }
 
 const initialState: AuthState = {
@@ -16,6 +17,7 @@ const initialState: AuthState = {
   token: null,
   isAuthorized: false,
   userEmail: "",
+  userProfileImg: "",
 };
 
 const authSlice = createSlice({
@@ -31,6 +33,7 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthorized = false;
       state.userNickname = "";
+      state.userProfileImg = "";
     },
     setNickname(state, action: PayloadAction<string>) {
       state.userNickname = action.payload;
@@ -38,14 +41,19 @@ const authSlice = createSlice({
     setUserEmail(state, action: PayloadAction<string>) {
       state.userEmail = action.payload;
     },
+    setUserProfileImg(state, action: PayloadAction<string>) {
+      state.userProfileImg = action.payload;
+    },
     // 필요한 다른 액션들을 추가
   },
   extraReducers: (builder) => {
     builder
       .addCase(login.fulfilled, (state, action) => {
-        const { userId, userNickname, token, userEmail } = action.payload;
+        const { userId, userNickname, token, userEmail, userProfileImg } =
+          action.payload;
         state.userId = userId;
         state.userNickname = userNickname;
+        state.userProfileImg = userProfileImg;
         state.token = token;
         state.userEmail = userEmail;
       })
@@ -59,6 +67,11 @@ const authSlice = createSlice({
   },
 });
 
-export const { setToken, clearAuth, setNickname, setUserEmail } =
-  authSlice.actions;
+export const {
+  setToken,
+  clearAuth,
+  setNickname,
+  setUserEmail,
+  setUserProfileImg,
+} = authSlice.actions;
 export default authSlice.reducer;

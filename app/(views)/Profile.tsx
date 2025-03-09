@@ -19,13 +19,32 @@ import { AppDispatch } from "@/redux/store";
 import { RootState } from "@/redux/reducer";
 import GeneralAppBar from "@/components/GeneralAppBar";
 import * as ImagePicker from "expo-image-picker";
+import { useMutation } from "@tanstack/react-query";
+import { uploadProfileimgApi } from "@/redux/apis/file/fileApi";
+import { setUserProfileImg } from "@/redux/slices/auth/authSlice";
 
 export default function LoginScreen() {
   const router = useRouter();
+
   const dispatch = useDispatch<AppDispatch>();
-  const [image, setImage] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: async ({ uri, userId }: { uri: string; userId: string }) => {
+      return await uploadProfileimgApi(uri, userId);
+    },
+    onSuccess: () => {
+      Alert.alert("성공", "이미지가 업로드되었습니다.");
+    },
+    onError: () => {
+      Alert.alert("실패", "이미지 업로드에 실패했습니다.");
+    },
+  });
+  const userId = useSelector((state: RootState) => state.auth.userId);
+  const imgUrl = useSelector((state: RootState) => state.auth.userProfileImg);
+  // imgUrl 값이 있을 때만 setImage 호출
+  const [image, setImage] = useState(imgUrl || "");
   const selectImg = async () => {
-    //권한 요청
+    // 권한 요청
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("권한 필요", "사진첩 접근을 허용해야 합니다.");
@@ -41,14 +60,33 @@ export default function LoginScreen() {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      //이미지 서버저장
+      // mutate를 사용하여 업로드 수행
+      mutation.mutate(
+        {
+          uri: result.assets[0].uri,
+          userId: userId,
+        },
+        {
+          // mutate가 완료된 후 실행될 onSuccess 콜백
+          onSuccess: (data: any) => {
+            // 서버에서 리턴된 URL을 setImage에 전달
+
+            console.log(data);
+            setImage(data); // data.imageUrl은 서버가 반환하는 URL
+
+            dispatch(setUserProfileImg(data));
+          },
+          onError: (error) => {
+            // 업로드 실패 시 처리
+            console.error("Image upload failed:", error);
+          },
+        },
+      );
     }
   };
 
   const { width, height } = Dimensions.get("window");
 
-  const userId = useSelector((state: RootState) => state.auth.userId);
   const userNickname = useSelector(
     (state: RootState) => state.auth.userNickname,
   );
@@ -144,7 +182,10 @@ export default function LoginScreen() {
           {/* 로고 */}
           <TouchableOpacity onPress={selectImg}>
             {image ? (
-              <Image source={{ uri: image }} style={styles.profileImg} />
+              <Image
+                source={{ uri: `http://localhost:8080${image}` }}
+                style={styles.profileImg}
+              />
             ) : (
               <Image
                 source={require("@/assets/images/gyoolTalk.png")}
@@ -159,7 +200,7 @@ export default function LoginScreen() {
             </View>
           </TouchableOpacity>
         </View>
-        {/* 닉네임  확인*/}
+        {/* 닉네임 확인 */}
         <TouchableOpacity onPress={updateNickName}>
           <View style={styles.inputView}>
             <Text style={styles.inputKey}>닉네임</Text>
@@ -169,12 +210,12 @@ export default function LoginScreen() {
             <Image source={require("@/assets/images/icon/right-arrow.png")} />
           </View>
         </TouchableOpacity>
-        {/* 아이디  확인*/}
+        {/* 아이디 확인 */}
         <View style={styles.inputView}>
           <Text style={styles.inputKey}>아이디</Text>
           <Text style={styles.inputValue}>{userId}</Text>
         </View>
-        {/* 이메일  확인*/}
+        {/* 이메일 확인 */}
         <View style={styles.inputView}>
           <Text style={styles.inputKey}>이메일</Text>
           <Text style={styles.inputValue}>{userEmail}</Text>

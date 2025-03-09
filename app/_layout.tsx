@@ -74,6 +74,14 @@ export default function RootLayout() {
           >
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="(views)/Profile"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="(views)/Nickname"
+                options={{ headerShown: false }}
+              />
               <Stack.Screen name="Login" options={screenOptions("로그인")} />
               <Stack.Screen name="Join" options={screenOptions("회원가입")} />
               <Stack.Screen
