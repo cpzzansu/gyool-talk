@@ -102,7 +102,7 @@ const FirstView = () => {
           <TouchableOpacity onPress={goProfile}>
             <ListItem
               id={userNickname}
-              profileImg={userProfileImg}
+              profileImg={`http://localhost:8080${userProfileImg}`}
               marginBottom={0.063}
             />
           </TouchableOpacity>
@@ -162,7 +162,7 @@ const ListItem = ({
       }}
     >
       <Image
-        style={{ width: width * 0.1, height: width * 0.109 }}
+        style={{ width: width * 0.1, height: width * 0.109, borderRadius: 100 }}
         source={
           profileImg
             ? { uri: profileImg }

@@ -21,13 +21,13 @@ import GeneralAppBar from "@/components/GeneralAppBar";
 import * as ImagePicker from "expo-image-picker";
 import { useMutation } from "@tanstack/react-query";
 import { uploadProfileimgApi } from "@/redux/apis/file/fileApi";
+import { setUserProfileImg } from "@/redux/slices/auth/authSlice";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
-  const [image, setImage] = useState("");
 
-  // useMutation을 컴포넌트 레벨에서 호출합니다.
+  const dispatch = useDispatch<AppDispatch>();
+
   const mutation = useMutation({
     mutationFn: async ({ uri, userId }: { uri: string; userId: string }) => {
       return await uploadProfileimgApi(uri, userId);
@@ -40,6 +40,9 @@ export default function LoginScreen() {
     },
   });
   const userId = useSelector((state: RootState) => state.auth.userId);
+  const imgUrl = useSelector((state: RootState) => state.auth.userProfileImg);
+  // imgUrl 값이 있을 때만 setImage 호출
+  const [image, setImage] = useState(imgUrl || "");
   const selectImg = async () => {
     // 권한 요청
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -57,12 +60,28 @@ export default function LoginScreen() {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri); // 선택된 이미지 URI 업데이트
       // mutate를 사용하여 업로드 수행
-      mutation.mutate({
-        uri: result.assets[0].uri,
-        userId: userId,
-      });
+      mutation.mutate(
+        {
+          uri: result.assets[0].uri,
+          userId: userId,
+        },
+        {
+          // mutate가 완료된 후 실행될 onSuccess 콜백
+          onSuccess: (data: any) => {
+            // 서버에서 리턴된 URL을 setImage에 전달
+
+            console.log(data);
+            setImage(data); // data.imageUrl은 서버가 반환하는 URL
+
+            dispatch(setUserProfileImg(data));
+          },
+          onError: (error) => {
+            // 업로드 실패 시 처리
+            console.error("Image upload failed:", error);
+          },
+        },
+      );
     }
   };
 
@@ -163,7 +182,10 @@ export default function LoginScreen() {
           {/* 로고 */}
           <TouchableOpacity onPress={selectImg}>
             {image ? (
-              <Image source={{ uri: image }} style={styles.profileImg} />
+              <Image
+                source={{ uri: `http://localhost:8080${image}` }}
+                style={styles.profileImg}
+              />
             ) : (
               <Image
                 source={require("@/assets/images/gyoolTalk.png")}
