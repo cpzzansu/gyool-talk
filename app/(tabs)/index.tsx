@@ -133,7 +133,11 @@ const FirstView = () => {
           <TouchableOpacity onPress={goProfile}>
             <ListItem
               id={userNickname}
-              profileImg={`http://localhost:8080${userProfileImg}`}
+              profileImg={
+                userProfileImg
+                  ? `http://localhost:8080/images/profile/${userProfileImg}`
+                  : ""
+              }
               marginBottom={0.063}
             />
           </TouchableOpacity>
@@ -162,7 +166,11 @@ const FirstView = () => {
             >
               <ListItem
                 id={friend.userNickName}
-                profileImg={friend.userProfileImg}
+                profileImg={
+                  friend.userProfileImg
+                    ? `http://localhost:8080/images/profile/${friend.userProfileImg}`
+                    : ""
+                }
                 marginBottom={0.05}
               />
             </TouchableOpacity>

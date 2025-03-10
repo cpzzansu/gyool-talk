@@ -185,7 +185,12 @@ export default function AddFriend() {
           <View style={styles.rowContainer2}>
             {/* 프로필 이미지 */}
             {userProfileImg ? (
-              <Image source={{ uri: userProfileImg }} style={styles.profile} />
+              <Image
+                source={{
+                  uri: `http://localhost:8080/image/profile/${userProfileImg}`,
+                }}
+                style={styles.profile}
+              />
             ) : (
               <Image
                 source={require("@/assets/images/gyoolTalk.png")}
@@ -205,7 +210,7 @@ export default function AddFriend() {
               disabled={isFriendRequestPending} // 버튼 비활성화
             >
               <ThemedText style={styles.addButtonText}>
-                {isFriendRequestPending ? "요청됨" : "추가"}
+                {isFriendRequestPending ? "추가됨" : "추가"}
               </ThemedText>
             </TouchableOpacity>
           </View>
