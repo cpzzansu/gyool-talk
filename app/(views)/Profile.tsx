@@ -183,7 +183,9 @@ export default function LoginScreen() {
           <TouchableOpacity onPress={selectImg}>
             {image ? (
               <Image
-                source={{ uri: `http://localhost:8080${image}` }}
+                source={{
+                  uri: `http://localhost:8080/images/profile/${image}`,
+                }}
                 style={styles.profileImg}
               />
             ) : (
