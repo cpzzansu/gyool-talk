@@ -26,6 +26,7 @@ export default function AddFriend() {
   const [userProfileImg, setUserProfileImg] = useState<string | null>(null);
   const [searchAttempted, setSearchAttempted] = useState(false); // 검색 여부 추적
   const [isFriendRequestPending, setIsFriendRequestPending] = useState(false); // 친구 요청 상태
+  const [isFriend, setIsFriend] = useState(false); // 친구  상태
   const imgUrl = "../assets/images/cat.jpg";
 
   const showAlert = (message: string) => {
@@ -40,18 +41,18 @@ export default function AddFriend() {
     setSearchAttempted(true); // 검색 시도 상태 변경
 
     try {
-      const result = await common.postRequest("/user/findId", {
+      const result = await common.postRequest("/active/findId", {
         userId: selectId,
       });
 
       if (result.userId) {
         setFriendId(result.userId);
         setUserProfileImg(result.userProfileImg || null); // 프로필 이미지 URL 설정
-        setIsFriendRequestPending(!!result.friendRequest); // 친구 요청 상태 설정
+        setIsFriend(!!result.friendRequest); // 친구 요청 상태 설정
       } else {
         setFriendId("");
         setUserProfileImg(null); // 프로필 이미지 초기화
-        setIsFriendRequestPending(false); // 검색 결과 없을 경우 상태 초기화
+        setIsFriend(false); // 검색 결과 없을 경우 상태 초기화
       }
     } catch (error) {
       console.error("친구 검색 오류:", error);
@@ -61,7 +62,7 @@ export default function AddFriend() {
 
   const addFriend = async () => {
     try {
-      const result = await common.postRequest("/user/addFriend", {
+      const result = await common.postRequest("/active/addFriend", {
         userId,
         friendId,
         status: 0,
@@ -69,7 +70,6 @@ export default function AddFriend() {
 
       if (result) {
         setIsFriendRequestPending(true); // 친구 요청 상태 업데이트
-        showAlert("친구 요청을 보냈습니다.");
       } else {
         showAlert("친구 요청에 실패했습니다.");
       }
@@ -113,6 +113,7 @@ export default function AddFriend() {
     profile: {
       width: width * 0.1,
       height: width * 0.1,
+      borderRadius: 100,
       resizeMode: "contain", // 원본 비율 유지
     },
     line: {
@@ -187,7 +188,7 @@ export default function AddFriend() {
             {userProfileImg ? (
               <Image
                 source={{
-                  uri: `http://localhost:8080/image/profile/${userProfileImg}`,
+                  uri: `http://localhost:8080/images/profile/${userProfileImg}`,
                 }}
                 style={styles.profile}
               />
@@ -204,15 +205,16 @@ export default function AddFriend() {
             </View>
 
             {/* 추가 버튼 (오른쪽) */}
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={isFriendRequestPending ? undefined : addFriend} // 요청 중이면 클릭 못 하게 처리
-              disabled={isFriendRequestPending} // 버튼 비활성화
-            >
-              <ThemedText style={styles.addButtonText}>
-                {isFriendRequestPending ? "추가됨" : "추가"}
-              </ThemedText>
-            </TouchableOpacity>
+            {!isFriend && (
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={addFriend} // 친구 추가 기능 실행
+              >
+                <ThemedText style={styles.addButtonText}>
+                  {isFriendRequestPending ? "추가됨" : "추가"}
+                </ThemedText>
+              </TouchableOpacity>
+            )}
           </View>
         ) : (
           // 검색 결과가 없을 경우

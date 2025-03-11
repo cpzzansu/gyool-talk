@@ -16,11 +16,13 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { join } from "@/redux/slices/auth/authThunk";
 import { AppDispatch } from "@/redux/store";
+import * as common from "@/utils/common";
 
 export default function LoginScreen() {
   const { width, height } = Dimensions.get("window");
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter(); // 페이지 이동을 위한 useRouter 사용
+
   const [userId, setUserId] = useState(""); // 아이디 상태 관리
   const [password, setPassword] = useState(""); // 비밀번호 상태 관리
   const [passwordChk, setPasswordChk] = useState(""); // 비밀번호확인 상태 관리
@@ -29,8 +31,8 @@ export default function LoginScreen() {
   const [nickname, setNickName] = useState(""); // 닉네임 상태 관리
 
   const [isDuplicate, setIsDuplicate] = useState<boolean | null>(null); // 아이디 중복 여부
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null); // 아이디 중복 여부
-  const [isConfirm, setIsConfirm] = useState(false); // 아이디 중복 여부
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [isConfirm, setIsConfirm] = useState(false);
 
   const showAlert = (title: string, message: string) => {
     if (Platform.OS === "web") {
@@ -64,50 +66,64 @@ export default function LoginScreen() {
   };
 
   //이메일 확인
-  const emailConfirm = () => {
-    if (!email.includes("@")) {
-      showAlert("회원가입", "이메일 주소가 유효하지 않습니다.");
+  const emailConfirm = async () => {
+    if (!common.isValidEmail(email)) {
+      showAlert("회원가입", "올바른 이메일 형식을 입력해주세요.");
       return;
     }
-    axios
-      .post("http://localhost:8080/user/confirmEmail", { userEmail: email })
-      .then(function (resp: any) {
-        console.log(resp.data);
-        if (resp.data) {
-          showAlert("회원가입", "인증번호가 발송되었습니다.");
-          setIsConfirm(true);
-        } else {
-          showAlert("회원가입", "잠시후 다시 시도 해주세요.");
-        }
-      })
-      .catch(function (err: any) {
-        console.log(`Error Message: ${err}`);
+    try {
+      const response = await fetch("http://localhost:8080/user/confirmEmail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userEmail: email }),
       });
+
+      const result = await response.status;
+
+      if (result.valueOf() == 200) {
+        showAlert("회원가입", "인증번호가 발송되었습니다.");
+        setIsConfirm(true);
+      } else {
+        showAlert("회원가입", "이메일 인증 요청 실패. 다시 시도해주세요.");
+        setEmail("");
+      }
+    } catch (error) {
+      console.error("이메일 인증 요청 오류:", error);
+      showAlert("회원가입", "서버 오류가 발생했습니다. 관리자에게 문의하세요.");
+    }
   };
 
   //인증번호 확인 todo)) 로직 연결
-  const cofirmNumCheck = () => {
-    if (!isConfirm) {
-      showAlert("회원가입", "이메일 인증버튼을 눌러주세요");
+  const cofirmNumCheck = async () => {
+    if (!confirmNum) {
+      showAlert("회원가입", "인증번호를 입력해주세요.");
       return;
     }
-    console.log("인증번호 확인 체크");
 
-    axios
-      .post("http://localhost:8080/join/checkConfimNum", {
-        confirmNum: confirmNum,
-      })
-      .then(function (resp: any) {
-        console.log(resp.data);
-        if (resp.data) {
-          setIsCorrect(false);
-        } else {
-          setIsCorrect(true);
-        }
-      })
-      .catch(function (err: any) {
-        console.log(`Error Message: ${err}`);
+    try {
+      const response = await fetch("http://localhost:8080/user/checkAuthNum", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email, authNum: confirmNum }),
       });
+
+      const result = await response.json();
+
+      if (result) {
+        setIsCorrect(false); // 인증번호 발송 상태 업데이트
+      } else {
+        showAlert("회원가입", "인증번호가 올바르지 않습니다.");
+        setIsCorrect(true);
+        setConfirmNum("");
+      }
+    } catch (error) {
+      console.error("이메일 인증 확인 오류:", error);
+      showAlert("회원가입", "서버 오류가 발생했습니다. 관리자에게 문의하세요.");
+    }
   };
   //닉네임 길이 확인
   const maxLength = 16;
