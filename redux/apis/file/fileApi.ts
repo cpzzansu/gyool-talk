@@ -16,7 +16,7 @@ export const uploadProfileimgApi = async (
     formData.append("userId", userId); // 사용자 ID
 
     // FormData로 POST 요청 보내기
-    const response = await api.post("/user/upload/image", formData, {
+    const response = await api.post("/active/upload/image", formData, {
       headers: {
         "Content-Type": "multipart/form-data", // Content-Type을 multipart/form-data로 설정
       },

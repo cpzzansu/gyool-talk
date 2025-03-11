@@ -49,7 +49,7 @@ export const updateNickName = createAsyncThunk(
   ) => {
     try {
       const response = await updateNickNameApi(user);
-      console.log(response.data.userNickName + "????");
+
       if (response.data) {
         return { userNickName: response.data.userNickName };
       }

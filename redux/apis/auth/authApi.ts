@@ -44,7 +44,7 @@ export const updateNickNameApi = async (user: {
   userNickName: string;
 }) => {
   try {
-    const response = await api.post("/user/upDateNickName", user);
+    const response = await api.post("/active/upDateNickName", user);
     return response;
   } catch (error: any) {
     console.log(`Error Message: ${error}`);
