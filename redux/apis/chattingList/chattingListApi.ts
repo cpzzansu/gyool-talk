@@ -34,6 +34,7 @@ export const createChattingApi = async (
 };
 
 export const fetchChatroomApi = async () => {
-  const response = await api.get("/chatting/fetchChatroom");
+  const response = await api.get(`/chatting/fetchChatroom`);
+  console.log("채팅방 정보: ", response.data);
   return response.data;
 };

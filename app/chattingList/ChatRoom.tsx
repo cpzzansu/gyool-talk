@@ -1,101 +1,133 @@
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  Dimensions,
   FlatList,
   TextInput,
-  Button,
+  TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import GeneralAppBar from "@/components/GeneralAppBar";
-import { useState } from "react";
-import { TouchableOpacity } from "react-native";
-import { useQuery } from "@tanstack/react-query";
-import { fetchFriendListApi } from "@/redux/apis/friend/friendApi";
-import { Friend } from "@/types/friend";
-import UserListItem from "@/components/UserListItem";
-
-const { width, height } = Dimensions.get("window");
-
-// 더미 데이터 (실제 사용 시 서버에서 불러옴)
-const dummyMessages = [
-  {
-    id: "1",
-    sender: "friend",
-    text: "안녕하세요~ 같이 여행해요.",
-    profile: "https://your-image-url.com/friend1.jpg",
-  },
-  {
-    id: "2",
-    sender: "me",
-    text: "네, 저는 지금 한라산 정상이에요. \n" + "이리로 오세요.",
-  },
-];
+import { createWebSocketClient, subscribeToChat } from "@/utils/webSocket";
+import { useLocalSearchParams } from "expo-router";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/reducer";
+import { Message } from "@/redux/apis/chattingList/chattingListApi";
+import * as WebSocketUtils from "@/utils/webSocket";
+import { Client } from "@stomp/stompjs";
+const { width } = Dimensions.get("window");
 
 const ChatRoom = () => {
-  const [messages, setMessages] = useState(dummyMessages);
-  const [input, setInput] = useState("");
+  const userId = useSelector((state: RootState) => state.auth.userId);
+  const { chatId } = useLocalSearchParams<{ chatId?: number }>();
 
-  const sendMessage = () => {
-    if (input.trim()) {
-      setMessages([
-        ...messages,
-        { id: Date.now().toString(), sender: "me", text: input },
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [sendMessage, setSendMessage] = useState<
+    ((messageDto: Message) => void) | null
+  >(null);
+
+  const handleSendMessage = () => {
+    if (input.trim() && chatId && sendMessage) {
+      const messageDto: Message = {
+        id: Date.now(), // 서버에서 처리할 수 있는 고유 ID
+        senderId: userId, // Redux에서 가져온 내 아이디
+        content: input,
+        messageType: 1, // TEXT 메시지 타입 예시
+        attachments: [], // 첨부파일이 있을 경우 추가
+        timestamp: new Date().toISOString(), // 메시지 전송 타임스탬프
+      };
+
+      // 내 메시지는 바로 로컬에 추가하여 UI에 표시 (보낸 메시지만 화면에 보여줌)
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        messageDto, // 내 메시지만 추가
       ]);
-      setInput("");
+
+      // WebSocket을 통해 서버로 메시지 전송
+      sendMessage(messageDto);
+      setInput(""); // 메시지 입력란 비우기
     }
   };
 
-  const renderMessage = ({ item: item }) => {
-    return (
+  useEffect(() => {
+    if (!chatId) return;
+
+    let stompClient: Client | null = null;
+
+    (async () => {
+      try {
+        stompClient = await WebSocketUtils.createWebSocketClient(
+          chatId,
+          (message) => {
+            console.log("받은 메시지:", message);
+            setMessages((prev) =>
+              prev.some((msg) => msg.id === message.id)
+                ? prev
+                : [...prev, message],
+            );
+          },
+        );
+
+        if (stompClient) {
+          setSendMessage(
+            () => (msg: Message) =>
+              WebSocketUtils.sendMessage(stompClient!, chatId, msg),
+          );
+        }
+      } catch (error) {
+        console.error("WebSocket 연결 오류:", error);
+      }
+    })();
+
+    return () => {
+      if (stompClient) {
+        WebSocketUtils.disconnectWebSocket(stompClient);
+      }
+    };
+  }, [chatId, userId]);
+
+  const renderMessage = ({ item }: { item: Message }) => (
+    <View
+      style={[
+        styles.messageContainer,
+        item.senderId === userId
+          ? styles.myMessageContainer
+          : styles.friendMessageContainer,
+      ]}
+    >
       <View
         style={[
-          styles.messageContainer,
-          item.sender === "me"
-            ? styles.myMessageContainer
-            : styles.friendMessageContainer,
+          styles.messageBubble,
+          item.senderId === userId
+            ? styles.myMessageBubble
+            : styles.friendMessageBubble,
         ]}
       >
-        {/*{item.sender === "friend" && (*/}
-        {/*  <Image source={{ uri: item.profile }} style={styles.profileImage} />*/}
-        {/*)}*/}
-        <View
+        <Text
           style={[
-            styles.messageBubble,
-            item.sender === "me"
-              ? styles.myMessageBubble
-              : styles.friendMessageBubble,
+            styles.messageText,
+            item.senderId === userId && styles.myMessageText,
           ]}
         >
-          <Text
-            style={[
-              styles.messageText,
-              item.sender === "me" && styles.myMessageText, // ✅ "me"일 때만 적용
-            ]}
-          >
-            {item.text}
-          </Text>
-        </View>
+          {item.content}
+        </Text>
       </View>
-    );
-  };
+    </View>
+  );
 
   return (
     <>
-      {/* 채팅창 상단 앱바 */}
       <GeneralAppBar title={"대화방"} />
 
-      {/* 채팅 메시지 목록 */}
       <FlatList
         data={messages}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()} // id를 문자열로 변환
         renderItem={renderMessage}
         style={styles.chatContainer}
-        //inverted // 최근 메시지가 아래에서 위로 가도록 설정
       />
 
-      {/* 메시지 입력창 */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -104,7 +136,7 @@ const ChatRoom = () => {
           placeholder="메시지를 입력하세요..."
           placeholderTextColor="#827F7F"
         />
-        <TouchableOpacity style={styles.button} onPress={sendMessage}>
+        <TouchableOpacity style={styles.button} onPress={handleSendMessage}>
           <Text style={styles.buttonText}>전송</Text>
         </TouchableOpacity>
       </View>
@@ -131,12 +163,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignSelf: "flex-start",
   },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
   messageBubble: {
     padding: 10,
     borderRadius: 5,
@@ -144,7 +170,6 @@ const styles = StyleSheet.create({
   },
   myMessageBubble: {
     backgroundColor: "#F29856",
-    color: "#FFFFFF",
     alignSelf: "flex-end",
   },
   friendMessageBubble: {
@@ -153,6 +178,9 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: width * 0.03,
+  },
+  myMessageText: {
+    color: "#FFFFFF",
   },
   inputContainer: {
     flexDirection: "row",
@@ -166,7 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EFEFEF",
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginRight: 10, // 버튼과 간격 조정
+    marginRight: 10,
   },
   button: {
     backgroundColor: "#F29856",
@@ -178,9 +206,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFFFFF",
     fontSize: width * 0.03,
-  },
-  myMessageText: {
-    color: "#FFFFFF",
   },
 });
 

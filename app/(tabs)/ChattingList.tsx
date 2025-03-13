@@ -74,7 +74,10 @@ export default function TabTwoScreen() {
                     marginBottom: width * 0.05,
                   }}
                   onPress={() =>
-                    router.push(`/chattingList/ChatRoom?id=${chat.id}`)
+                    router.push({
+                      pathname: "/chattingList/ChatRoom",
+                      params: { chatId: chat.id }, // JSON 문자열로 변환
+                    })
                   }
                 >
                   <ListItem
