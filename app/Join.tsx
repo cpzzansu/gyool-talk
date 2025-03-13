@@ -71,7 +71,24 @@ export default function LoginScreen() {
       showAlert("회원가입", "올바른 이메일 형식을 입력해주세요.");
       return;
     }
+
     try {
+      const isEmail = await fetch("http://localhost:8080/user/findId", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userEmail: email }),
+      });
+
+      const emailCheck = await isEmail.json();
+
+      if (emailCheck.isEmailUser != "N") {
+        setEmail("");
+        showAlert("회원가입", "이미 등록된 이메일 입니다.");
+        return;
+      }
+
       const response = await fetch("http://localhost:8080/user/confirmEmail", {
         method: "POST",
         headers: {
@@ -95,7 +112,7 @@ export default function LoginScreen() {
     }
   };
 
-  //인증번호 확인 todo)) 로직 연결
+  //인증번호 확인
   const cofirmNumCheck = async () => {
     if (!confirmNum) {
       showAlert("회원가입", "인증번호를 입력해주세요.");
