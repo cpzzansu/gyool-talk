@@ -4,6 +4,10 @@ export interface CreateChatting {
   friendId: string;
 }
 
+export interface FindMessage {
+  id: number;
+}
+
 export interface Chatroom {
   id: number;
   chatroomName: string;
@@ -36,5 +40,10 @@ export const createChattingApi = async (
 export const fetchChatroomApi = async () => {
   const response = await api.get(`/chatting/fetchChatroom`);
   console.log("채팅방 정보: ", response.data);
+  return response.data;
+};
+
+export const fetchMessageApi = async (chatId: number): Promise<Message> => {
+  const response = await api.post(`/chatting/fetchMessage?chatId=${chatId}`);
   return response.data;
 };
