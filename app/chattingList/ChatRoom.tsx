@@ -9,13 +9,14 @@ import {
   Dimensions,
 } from "react-native";
 import GeneralAppBar from "@/components/GeneralAppBar";
-import { createWebSocketClient, subscribeToChat } from "@/utils/webSocket";
+import { fetchMessageApi } from "@/redux/apis/chattingList/chattingListApi";
 import { useLocalSearchParams } from "expo-router";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/reducer";
 import { Message } from "@/redux/apis/chattingList/chattingListApi";
 import * as WebSocketUtils from "@/utils/webSocket";
 import { Client } from "@stomp/stompjs";
+import { useQuery } from "@tanstack/react-query";
 const { width } = Dimensions.get("window");
 
 const ChatRoom = () => {
@@ -28,6 +29,18 @@ const ChatRoom = () => {
     ((messageDto: Message) => void) | null
   >(null);
 
+  const { data, isLoading, error } = useQuery<Message[]>({
+    queryKey: ["chatId", chatId], // chatId를 queryKey에 추가하여, chatId가 바뀌면 새로 데이터를 가져오도록 설정
+    queryFn: () => fetchMessageApi(chatId), // fetchMessageApi에 chatId를 전달
+  });
+
+  // Fetch된 메시지 데이터를 messages에 반영
+  useEffect(() => {
+    if (data) {
+      setMessages(data);
+    }
+  }, [data]);
+
   const handleSendMessage = () => {
     if (input.trim() && chatId && sendMessage) {
       const messageDto: Message = {
@@ -36,7 +49,7 @@ const ChatRoom = () => {
         content: input,
         messageType: 1, // TEXT 메시지 타입 예시
         attachments: [], // 첨부파일이 있을 경우 추가
-        timestamp: new Date().toISOString(), // 메시지 전송 타임스탬프
+        timestamp: "", // 메시지 전송 타임스탬프
       };
 
       // 내 메시지는 바로 로컬에 추가하여 UI에 표시 (보낸 메시지만 화면에 보여줌)
@@ -120,6 +133,12 @@ const ChatRoom = () => {
   return (
     <>
       <GeneralAppBar title={"대화방"} />
+
+      {/* 로딩 상태 표시 */}
+      {isLoading && <Text>로딩 중...</Text>}
+
+      {/* 오류 상태 처리 */}
+      {error && <Text>메시지 로드에 실패했습니다.</Text>}
 
       <FlatList
         data={messages}
