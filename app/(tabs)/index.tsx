@@ -21,6 +21,7 @@ import {
   CreateChatting,
   createChattingApi,
 } from "@/redux/apis/chattingList/chattingListApi";
+import { string } from "prop-types";
 
 // const data = {
 //   nickname: "내 아이디",
@@ -58,6 +59,13 @@ const FirstView = () => {
     mutationFn: createChattingApi,
     onSuccess: (data) => {
       console.log("채팅방 생성 성공:", data);
+      //대화하기 닫기
+      SheetManager.hide("friendOptions");
+
+      router.push({
+        pathname: "/chattingList/ChatRoom",
+        params: { chatId: data }, // JSON 문자열로 변환
+      });
     },
     onError: (error) => {
       console.error("채팅방 생성 실패:", error);
