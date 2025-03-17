@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.limsujung.gyoolTalk"
     },
     "web": {
       "bundler": "metro",
@@ -36,7 +37,11 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      ["@react-native-seoul/naver-login",
+        {
+          "urlScheme": "com.limsujung.gyoolTalk"
+        }]
     ],
     "experiments": {
       "typedRoutes": true
@@ -47,7 +52,11 @@
       },
       "eas": {
         "projectId": "37a13523-0072-462c-aee3-8dc751c763dc"
-      }
+      },
+      "EXPO_PUBLIC_NAVER_CLIENT_ID": "ML4TlZVYL9jxXT14IWVa",
+      "EXPO_PUBLIC_NAVER_CLIENT_SECRET": "Iy381KNvZp",
+      "EXPO_PUBLIC_NAVER_APP_NAME": "gyooltalk",
+      "EXPO_PUBLIC_APP_BUNDLE_IDENTIFIER": "com.limsujung.gyoolTalk"
     }
   }
 }

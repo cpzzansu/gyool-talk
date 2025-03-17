@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "@/redux/slices/auth/authThunk";
 import { AppDispatch } from "@/redux/store";
+import NaverLogin from "@react-native-seoul/naver-login";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -65,8 +66,10 @@ export default function LoginScreen() {
     }
   };
 
-  const snsLogin = (sns: string) => {
-    console.log(`${sns} 로그인`);
+  const snsLogin = async (sns: string) => {
+    const { failureResponse, successResponse } = await NaverLogin.login();
+    console.log(failureResponse);
+    console.log(successResponse);
   };
 
   const findId = () => {

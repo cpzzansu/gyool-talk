@@ -16,6 +16,8 @@ import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Constants from "expo-constants";
+import NaverLogin from "@react-native-seoul/naver-login";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -23,6 +25,40 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const router = useRouter();
   const colorScheme = useColorScheme();
+
+  const {
+    EXPO_PUBLIC_NAVER_CLIENT_ID,
+    EXPO_PUBLIC_NAVER_CLIENT_SECRET,
+    EXPO_PUBLIC_NAVER_APP_NAME,
+    EXPO_PUBLIC_APP_BUNDLE_IDENTIFIER,
+  } = Constants.expoConfig!.extra as {
+    EXPO_PUBLIC_NAVER_CLIENT_ID: string;
+    EXPO_PUBLIC_NAVER_CLIENT_SECRET: string;
+    EXPO_PUBLIC_NAVER_APP_NAME: string;
+    EXPO_PUBLIC_APP_BUNDLE_IDENTIFIER: string;
+  };
+
+  const appName = EXPO_PUBLIC_NAVER_APP_NAME;
+  const consumerKey = EXPO_PUBLIC_NAVER_CLIENT_ID;
+  const consumerSecret = EXPO_PUBLIC_NAVER_CLIENT_SECRET;
+  const serviceUrlSchemeIOS = EXPO_PUBLIC_APP_BUNDLE_IDENTIFIER;
+
+  useEffect(() => {
+    const initNaver = async () => {
+      try {
+        NaverLogin.initialize({
+          appName,
+          consumerKey,
+          consumerSecret,
+          serviceUrlSchemeIOS,
+          disableNaverAppAuthIOS: true,
+        });
+      } catch (error) {
+        console.error("NaverLogin 초기화 실패", error);
+      }
+    };
+    initNaver();
+  }, []);
 
   const [loaded] = useFonts({
     pretendard: require("@/assets/fonts/PretendardVariable.ttf"),
