@@ -1,0 +1,9 @@
+{
+  "build": {
+    "gyoolTalk": {
+      "ios": {
+        "distribution": "store"
+      }
+    }
+  }
+}

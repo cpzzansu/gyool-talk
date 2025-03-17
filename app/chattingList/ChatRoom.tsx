@@ -21,7 +21,7 @@ const { width } = Dimensions.get("window");
 
 const ChatRoom = () => {
   const userId = useSelector((state: RootState) => state.auth.userId);
-  const { chatId } = useLocalSearchParams<{ chatId?: number }>();
+  const { chatId } = useLocalSearchParams() as { chatId?: number };
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -31,7 +31,12 @@ const ChatRoom = () => {
 
   const { data, isLoading, error } = useQuery<Message[]>({
     queryKey: ["chatId", chatId], // chatId를 queryKey에 추가하여, chatId가 바뀌면 새로 데이터를 가져오도록 설정
-    queryFn: () => fetchMessageApi(chatId), // fetchMessageApi에 chatId를 전달
+    queryFn: () => {
+      if (chatId === undefined) {
+        throw new Error("chatId is undefined");
+      }
+      return fetchMessageApi(chatId);
+    }, // fetchMessageApi에 chatId를 전달
   });
 
   // Fetch된 메시지 데이터를 messages에 반영

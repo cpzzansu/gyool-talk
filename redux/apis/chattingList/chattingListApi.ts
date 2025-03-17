@@ -43,7 +43,7 @@ export const fetchChatroomApi = async () => {
   return response.data;
 };
 
-export const fetchMessageApi = async (chatId: number): Promise<Message> => {
+export const fetchMessageApi = async (chatId: number): Promise<Message[]> => {
   const response = await api.post(`/chatting/fetchMessage?chatId=${chatId}`);
   return response.data;
 };
