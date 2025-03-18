@@ -17,6 +17,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "@/redux/slices/auth/authThunk";
 import { AppDispatch } from "@/redux/store";
 import NaverLogin from "@react-native-seoul/naver-login";
+import { useMutation } from "@tanstack/react-query";
+import {
+  Chatroom,
+  CreateChatting,
+  createChattingApi,
+} from "@/redux/apis/chattingList/chattingListApi";
+import { SheetManager } from "react-native-actions-sheet";
+import { naverLoginApi } from "@/redux/apis/auth/authApi";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -24,6 +32,16 @@ export default function LoginScreen() {
   const [userId, setUserId] = useState(""); // 아이디 상태 관리
   const [password, setPassword] = useState(""); // 비밀번호 상태 관리
   const { width } = Dimensions.get("window");
+
+  const naverLoginMutation = useMutation<Promise<any>, Error, string>({
+    mutationFn: naverLoginApi,
+    onSuccess: (data) => {
+      console.log(data);
+    },
+    onError: (error) => {
+      console.error("채팅방 생성 실패:", error);
+    },
+  });
 
   const showAlert = (title: string, message: string) => {
     if (Platform.OS === "web") {
@@ -66,10 +84,9 @@ export default function LoginScreen() {
     }
   };
 
-  const snsLogin = async (sns: string) => {
-    const { failureResponse, successResponse } = await NaverLogin.login();
-    console.log(failureResponse);
-    console.log(successResponse);
+  const snsLogin = async () => {
+    const { successResponse } = await NaverLogin.login();
+    naverLoginMutation.mutate(successResponse?.accessToken!);
   };
 
   const findId = () => {
@@ -205,13 +222,13 @@ export default function LoginScreen() {
 
       {/* SNS 로그인 버튼들 */}
       <View style={styles.rowContainer}>
-        <TouchableOpacity onPress={() => snsLogin("naver")}>
+        <TouchableOpacity onPress={() => snsLogin()}>
           <Image
             source={require("@/assets/images/naver_login.png")}
             style={styles.loginImage}
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => snsLogin("google")}>
+        <TouchableOpacity onPress={() => snsLogin()}>
           <Image
             source={require("@/assets/images/google_login.png")}
             style={styles.loginImage}

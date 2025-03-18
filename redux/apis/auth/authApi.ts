@@ -51,3 +51,7 @@ export const updateNickNameApi = async (user: {
     return error;
   }
 };
+export const naverLoginApi = async (accessToken: string) => {
+  const response = await api.post("/naverLogin", { accessToken });
+  return response.data;
+};
