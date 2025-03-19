@@ -51,30 +51,6 @@ export default function LoginScreen() {
     }
   };
 
-  // const login = () => {
-  //   if (userId.trim() === "") {
-  //     showAlert("아이디 입력 확인", "아이디가 입력되지 않았습니다.");
-  //   } else if (password.trim() === "") {
-  //     showAlert("비밀번호 입력 확인", "비밀번호가 입력되지 않았습니다.");
-  //   } else {
-  //     axios
-  //       .post("http://localhost:8080/login", { id: userId, pwd: password })
-  //       .then(function (resp: any) {
-  //         console.log(resp.data);
-  //         if (resp.data !== null && resp.data != "") {
-  //           console.log("로그인 성공");
-  //         } else {
-  //           showAlert("로그인 실패", "아이디나 비밀번호를 확인하세요.");
-  //           setUserId("");
-  //           setPassword("");
-  //         }
-  //       })
-  //       .catch(function (err: any) {
-  //         console.log(`Error Message: ${err}`);
-  //       });
-  //   }
-  // };
-
   const handleLogin = async () => {
     try {
       // 로그인 요청

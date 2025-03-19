@@ -2,6 +2,8 @@ import api from "@/redux/apis/api";
 
 export interface CreateChatting {
   friendId: string;
+  friendNickname: string;
+  userNickname: string;
 }
 
 export interface FindMessage {

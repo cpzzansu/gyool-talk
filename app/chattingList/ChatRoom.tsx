@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   Dimensions,
+  Image,
 } from "react-native";
 import GeneralAppBar from "@/components/GeneralAppBar";
 import { fetchMessageApi } from "@/redux/apis/chattingList/chattingListApi";
@@ -17,17 +18,22 @@ import { Message } from "@/redux/apis/chattingList/chattingListApi";
 import * as WebSocketUtils from "@/utils/webSocket";
 import { Client } from "@stomp/stompjs";
 import { useQuery } from "@tanstack/react-query";
+import { formatTimestamp } from "@/utils/common";
+
 const { width } = Dimensions.get("window");
 
 const ChatRoom = () => {
   const userId = useSelector((state: RootState) => state.auth.userId);
   const { chatId } = useLocalSearchParams() as { chatId?: number };
-
+  const { friendProfileImg } = useLocalSearchParams() as {
+    friendProfileImg?: string;
+  };
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sendMessage, setSendMessage] = useState<
     ((messageDto: Message) => void) | null
   >(null);
+  const flatListRef = useRef<FlatList>(null); // FlatList 참조 추가
 
   const { data, isLoading, error } = useQuery<Message[]>({
     queryKey: ["chatId", chatId], // chatId를 queryKey에 추가하여, chatId가 바뀌면 새로 데이터를 가져오도록 설정
@@ -43,18 +49,22 @@ const ChatRoom = () => {
   useEffect(() => {
     if (data) {
       setMessages(data);
+      if (data.length > 0) {
+        flatListRef.current?.scrollToEnd({ animated: true }); // 메시지가 업데이트되면 자동으로 마지막 메시지로 스크롤
+      }
     }
   }, [data]);
 
   const handleSendMessage = () => {
     if (input.trim() && chatId && sendMessage) {
+      const timestamp = Date.now();
       const messageDto: Message = {
         id: Date.now(), // 서버에서 처리할 수 있는 고유 ID
         senderId: userId, // Redux에서 가져온 내 아이디
         content: input,
         messageType: 1, // TEXT 메시지 타입 예시
         attachments: [], // 첨부파일이 있을 경우 추가
-        timestamp: "", // 메시지 전송 타임스탬프
+        timestamp: timestamp.toString(), // 메시지 전송 타임스탬프
       };
 
       // 내 메시지는 바로 로컬에 추가하여 UI에 표시 (보낸 메시지만 화면에 보여줌)
@@ -71,7 +81,7 @@ const ChatRoom = () => {
 
   useEffect(() => {
     if (!chatId) return;
-
+    console.log("친구 프로필 이미지:", friendProfileImg); // 프로필 이미지 값 확인
     let stompClient: Client | null = null;
 
     (async () => {
@@ -115,23 +125,49 @@ const ChatRoom = () => {
           : styles.friendMessageContainer,
       ]}
     >
-      <View
-        style={[
-          styles.messageBubble,
-          item.senderId === userId
-            ? styles.myMessageBubble
-            : styles.friendMessageBubble,
-        ]}
-      >
-        <Text
+      {/* 상대방 메시지의 경우 프로필 이미지와 닉네임 표시 */}
+      {item.senderId !== userId && (
+        <View style={styles.profileInfoContainer}>
+          <Image
+            style={styles.profileImage}
+            source={
+              // 프로필 이미지가 있는 경우 URL로, 없으면 기본 이미지
+              friendProfileImg
+                ? { uri: friendProfileImg }
+                : require("@/assets/images/icon/friends-list-profile.png")
+            }
+          />
+        </View>
+      )}
+
+      <View style={styles.messageContentContainer}>
+        {item.senderId !== userId && (
+          <Text style={styles.profileNickname}>{item.senderId}</Text>
+        )}
+
+        <View
           style={[
-            styles.messageText,
-            item.senderId === userId && styles.myMessageText,
+            styles.messageBubble,
+            item.senderId === userId
+              ? styles.myMessageBubble
+              : styles.friendMessageBubble,
           ]}
         >
-          {item.content}
-        </Text>
+          <Text
+            style={[
+              styles.messageText,
+              item.senderId === userId && styles.myMessageText,
+            ]}
+          >
+            {item.content}
+          </Text>
+        </View>
       </View>
+
+      {/* 시간 표시 */}
+      <Text style={[styles.messageTimestamp]}>
+        {formatTimestamp(item.timestamp)} {/* 시간 포맷팅 함수 */}
+      </Text>
     </View>
   );
 
@@ -146,10 +182,15 @@ const ChatRoom = () => {
       {error && <Text>메시지 로드에 실패했습니다.</Text>}
 
       <FlatList
+        ref={flatListRef} // FlatList에 ref 연결
         data={messages}
         keyExtractor={(item) => item.id.toString()} // id를 문자열로 변환
         renderItem={renderMessage}
         style={styles.chatContainer}
+        onContentSizeChange={() =>
+          flatListRef.current?.scrollToEnd({ animated: true })
+        }
+        onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
 
       <View style={styles.inputContainer}>
@@ -182,15 +223,22 @@ const styles = StyleSheet.create({
   myMessageContainer: {
     justifyContent: "flex-end",
     alignSelf: "flex-end",
+    flexDirection: "row-reverse", // 내 메시지에서는 시간은 왼쪽, 메시지는 오른쪽
   },
   friendMessageContainer: {
+    flexDirection: "row",
     justifyContent: "flex-start",
     alignSelf: "flex-start",
+  },
+  messageContentContainer: {
+    flexDirection: "column", // 닉네임 → 메시지 → 시간 순으로 세로 정렬
+    alignItems: "flex-start", // 왼쪽 정렬
   },
   messageBubble: {
     padding: 10,
     borderRadius: 5,
-    width: width * 0.55,
+    width: "auto",
+    maxWidth: width * 0.6, // 최대 너비는 화면의 70%로 설정
   },
   myMessageBubble: {
     backgroundColor: "#F29856",
@@ -199,6 +247,12 @@ const styles = StyleSheet.create({
   friendMessageBubble: {
     backgroundColor: "#FFFFFF",
     alignSelf: "flex-start",
+  },
+  messageTimestamp: {
+    fontSize: width * 0.025,
+    color: "#848484",
+    marginLeft: width * 0.02, // 시간과 메시지 사이의 간격
+    marginRight: width * 0.02,
   },
   messageText: {
     fontSize: width * 0.03,
@@ -230,6 +284,21 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFFFFF",
     fontSize: width * 0.03,
+  },
+  profileInfoContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    marginRight: width * 0.02,
+  },
+  profileImage: {
+    width: width * 0.1,
+    height: width * 0.1,
+    borderRadius: 50,
+  },
+  profileNickname: {
+    marginBottom: width * 0.01,
+    fontSize: width * 0.03,
+    color: "#848484",
   },
 });
 
