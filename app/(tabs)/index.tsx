@@ -9,49 +9,63 @@ import {
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import TabsScreenAppBar from "@/components/TabsScreenAppBar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { RootState } from "@/redux/reducer";
 import ActionSheet, { SheetManager } from "react-native-actions-sheet";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Chatroom,
   CreateChatting,
   createChattingApi,
 } from "@/redux/apis/chattingList/chattingListApi";
-import { string } from "prop-types";
-
-// const data = {
-//   nickname: "내 아이디",
-//   friendsList: [
-//     { nickname: "친구아이디1" },
-//     { nickname: "친구아이디2" },
-//     { nickname: "친구아이디3" },
-//     { nickname: "친구아이디4" },
-//     { nickname: "친구아이디5" },
-//     { nickname: "친구아이디6" },
-//   ],
-// };
+import { login } from "@/redux/slices/auth/authThunk";
+import { fetchFriendList } from "@/redux/slices/friend/friendThunk";
+import { AppDispatch } from "@/redux/store";
+import { Friend } from "@/types/friend";
+import { fetchFriendListApi } from "@/redux/apis/friend/friendApi";
 
 const FirstView = () => {
   const { width } = Dimensions.get("window");
-  const token = useSelector((state: RootState) => state.auth.token);
   const { userNickname, userProfileImg } = useSelector(
     (state: any) => state.auth,
   );
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null); // 추가: 선택된 친구 ID
+  const [selectedFriendNickname, setSelectedFriendNickname] =
+    useState<string>(""); //선택된 친구 닉네임
   const router = useRouter();
   const goProfile = () => {
     router.push("/Profile");
   };
 
+  // useQuery로 친구 목록 불러오기
+  const { data, isLoading, error } = useQuery<Friend[]>({
+    queryKey: ["friend"],
+    queryFn: fetchFriendListApi,
+  });
+
+  // friendsList 상태 업데이트
+  useEffect(() => {
+    if (data) {
+      setFriendsList(data); // data가 존재하면 friendsList 업데이트
+    }
+  }, [data]);
+
   // ActionSheet 열기
-  const openActionSheet = (friendId: string) => {
+  const openActionSheet = (
+    friendId: string,
+    friendNickname: string,
+    friendProfileImg: string,
+  ) => {
     setSelectedFriendId(friendId); // 친구 ID를 상태에 저장
-    SheetManager.show("friendOptions", { friendId: friendId } as any);
+    setSelectedFriendNickname(friendNickname); // 친구 닉네임를 상태에 저장
+    SheetManager.show("friendOptions", {
+      friendId: friendId,
+      friendNickName: friendNickname,
+    } as any);
   };
 
   // 채팅방 생성 뮤테이션
@@ -59,12 +73,15 @@ const FirstView = () => {
     mutationFn: createChattingApi,
     onSuccess: (data) => {
       console.log("채팅방 생성 성공:", data);
-      //대화하기 닫기
+      // 대화하기 닫기
       SheetManager.hide("friendOptions");
 
+      // profileImg를 params에 포함시켜서 채팅방 화면으로 이동
       router.push({
         pathname: "/chattingList/ChatRoom",
-        params: { chatId: data }, // JSON 문자열로 변환
+        params: {
+          chatId: data,
+        },
       });
     },
     onError: (error) => {
@@ -75,39 +92,13 @@ const FirstView = () => {
   // 채팅방 생성 버튼 클릭 시 호출되는 함수
   const handleAddChattingClick = () => {
     if (selectedFriendId) {
-      mutation.mutate({ friendId: selectedFriendId }); // 선택된 친구 ID로 채팅방 생성
+      mutation.mutate({
+        friendId: selectedFriendId,
+        friendNickname: selectedFriendNickname,
+        userNickname: userNickname,
+      });
     }
   };
-
-  useEffect(() => {
-    if (token) {
-      console.log("친구목록조회");
-      axios
-        .get("http://localhost:8080/active/getFriends", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          // 서버에서 응답 받은 데이터 처리
-          console.log("응답 데이터:", response.data);
-          setFriendsList(response.data);
-        })
-        .catch((error) => {
-          // 오류 처리
-          if (error.response) {
-            // 서버가 응답을 반환했지만 오류가 발생한 경우
-            console.error("서버 응답 오류:", error.response.data);
-          } else if (error.request) {
-            // 요청이 서버에 도달했지만 응답이 없을 경우
-            console.error("응답 없음:", error.request);
-          } else {
-            // 요청 설정 중 오류가 발생한 경우
-            console.error("요청 설정 오류:", error.message);
-          }
-        });
-    }
-  }, [token]); // token이 변경될 때마다 실행
 
   return (
     <>
@@ -170,10 +161,16 @@ const FirstView = () => {
           {friendsList.map((friend) => (
             <TouchableOpacity
               key={friend.userId}
-              onPress={() => openActionSheet(friend.userId)} // 친구 클릭 시 친구 ID 전달
+              onPress={() =>
+                openActionSheet(
+                  friend.userId,
+                  friend.friendNickName,
+                  friend.userProfileImg,
+                )
+              }
             >
               <ListItem
-                id={friend.userNickName}
+                id={friend.friendNickName} // 기본값 추가
                 profileImg={
                   friend.userProfileImg
                     ? `http://localhost:8080/images/profile/${friend.userProfileImg}`

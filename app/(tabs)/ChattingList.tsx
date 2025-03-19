@@ -17,6 +17,7 @@ import {
   fetchChatroomApi,
 } from "@/redux/apis/chattingList/chattingListApi";
 import { useQuery } from "@tanstack/react-query";
+import { formatTimestamp } from "@/utils/common";
 
 const { width } = Dimensions.get("window");
 export default function TabTwoScreen() {
@@ -120,6 +121,7 @@ const ListItem = ({
         flexDirection: "row",
         justifyContent: "space-between",
         marginBottom: width * marginBottom,
+        width: width * 0.9,
       }}
     >
       <View
@@ -138,6 +140,7 @@ const ListItem = ({
             display: "flex",
             flexDirection: "column",
             gap: width * 0.005,
+            maxWidth: width * 0.55,
           }}
         >
           <Text
@@ -151,6 +154,8 @@ const ListItem = ({
               fontFamily: "pretendardMedium",
               color: "#848484",
             }}
+            numberOfLines={2} // 또는 2로 변경 가능
+            ellipsizeMode="tail" // 잘릴 때 '...' 표시
           >
             {lastMessage}
           </Text>
@@ -158,9 +163,8 @@ const ListItem = ({
       </View>
       <View
         style={{
-          display: "flex",
           justifyContent: "center",
-          alignItems: "center",
+          alignItems: "flex-end", // Align text to the right
         }}
       >
         <Text
@@ -168,9 +172,10 @@ const ListItem = ({
             fontSize: width * 0.027,
             fontFamily: "pretendardMedium",
             color: "#848484",
+            textAlign: "right", // 오른쪽 정렬 추가
           }}
         >
-          {timestamp}
+          {formatTimestamp(timestamp)}
         </Text>
       </View>
     </View>
