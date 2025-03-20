@@ -8,15 +8,17 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-
+import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { ThemedView } from "@/components/ThemedView";
 import TabsScreenAppBar from "@/components/TabsScreenAppBar";
 import { useRouter } from "expo-router";
 import {
   Chatroom,
   fetchChatroomApi,
+  deleteChattingApi,
+  DeleteChatting,
 } from "@/redux/apis/chattingList/chattingListApi";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatTimestamp } from "@/utils/common";
 
 const { width } = Dimensions.get("window");
@@ -27,7 +29,45 @@ export default function TabTwoScreen() {
   });
 
   const router = useRouter();
+  const renderRightActions = (chatId: any) => (
+    <View
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        width: 80,
+        height: "100%",
+        backgroundColor: "red",
+      }}
+    >
+      <RectButton
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          height: "100%",
+        }}
+        onPress={() => handleDelete(chatId)}
+      >
+        <Text style={{ color: "white", fontWeight: "bold" }}>삭제</Text>
+      </RectButton>
+    </View>
+  );
+  const handleDelete = (chatId: any) => {
+    mutation.mutate({
+      id: chatId,
+    });
+  };
 
+  // 채팅방 생성 뮤테이션
+  const mutation = useMutation<Chatroom, Error, DeleteChatting>({
+    mutationFn: deleteChattingApi,
+    onSuccess: (data) => {
+      console.log("채팅방 삭제 성공:", data);
+    },
+    onError: (error) => {
+      console.error("채팅방 삭제 실패:", error);
+    },
+  });
   return (
     <>
       <TabsScreenAppBar
@@ -66,30 +106,34 @@ export default function TabTwoScreen() {
 
               const message = chat.messages.pop();
               return (
-                <TouchableOpacity
-                  key={index} // 키 추가
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginBottom: width * 0.05,
-                  }}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/chattingList/ChatRoom",
-                      params: { chatId: chat.id }, // JSON 문자열로 변환
-                    })
-                  }
+                <Swipeable
+                  renderRightActions={() => renderRightActions(chat.id)}
                 >
-                  <ListItem
-                    chatroomId={chat.id}
-                    chatroomName={chat.chatroomName}
-                    lastMessage={message?.content!}
-                    timestamp={message?.timestamp!}
-                    marginBottom={0.05}
-                    key={index}
-                  />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    key={index} // 키 추가
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginBottom: width * 0.05,
+                    }}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/chattingList/ChatRoom",
+                        params: { chatId: chat.id }, // JSON 문자열로 변환
+                      })
+                    }
+                  >
+                    <ListItem
+                      chatroomId={chat.id}
+                      chatroomName={chat.chatroomName}
+                      lastMessage={message?.content!}
+                      timestamp={message?.timestamp!}
+                      marginBottom={0.05}
+                      key={index}
+                    />
+                  </TouchableOpacity>
+                </Swipeable>
               );
             })}
         </ThemedView>
