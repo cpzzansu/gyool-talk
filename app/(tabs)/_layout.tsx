@@ -3,19 +3,46 @@ import React, { useEffect } from "react";
 import { Platform, Image, Dimensions } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/reducer";
 
 import Login from "../Login";
+import { jwtDecode } from "jwt-decode";
+import { clearAuth } from "@/redux/slices/auth/authSlice";
 
 export default function TabLayout() {
   const { width } = Dimensions.get("window");
 
-  const router = useRouter();
+  const dispatch = useDispatch();
 
   const { token } = useSelector((state: RootState) => state.auth);
 
-  if (token === null) {
+  useEffect(() => {
+    if (typeof token !== "string") return;
+
+    const decoded = jwtDecode(token);
+    const currentTime = Date.now();
+    const tokenExpirationTime = decoded.exp! * 1000;
+    const delay = tokenExpirationTime - currentTime;
+
+    if (delay <= 0) {
+      dispatch(clearAuth());
+    } else {
+      const timer = setTimeout(() => {
+        dispatch(clearAuth());
+      }, delay);
+
+      return () => clearTimeout(timer);
+    }
+  }, [token]);
+
+  if (typeof token !== "string") {
+    return <Login />;
+  }
+  const decoded = jwtDecode(token);
+  const currentTime = Date.now() / 1000;
+  if (decoded.exp! < currentTime) {
+    dispatch(clearAuth());
     return <Login />;
   }
 
