@@ -18,7 +18,7 @@ import {
   deleteChattingApi,
   DeleteChatting,
 } from "@/redux/apis/chattingList/chattingListApi";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatTimestamp } from "@/utils/common";
 
 const { width } = Dimensions.get("window");
@@ -29,6 +29,24 @@ export default function TabTwoScreen() {
   });
 
   const router = useRouter();
+  const queryClient = useQueryClient(); // ✅ useQueryClient를 컴포넌트 최상단에서 호출
+
+  // 채팅방 삭제 뮤테이션
+  const mutation = useMutation<Chatroom, Error, DeleteChatting>({
+    mutationFn: deleteChattingApi,
+    onSuccess: (data) => {
+      console.log("채팅방 삭제 성공:", data);
+      queryClient.invalidateQueries(); // ✅ 올바른 방식으로 useQuery를 리페치
+    },
+    onError: (error) => {
+      console.error("채팅방 삭제 실패:", error);
+    },
+  });
+
+  const handleDelete = (chatId: any) => {
+    mutation.mutate({ id: chatId });
+  };
+
   const renderRightActions = (chatId: any) => (
     <View
       style={{
@@ -52,22 +70,7 @@ export default function TabTwoScreen() {
       </RectButton>
     </View>
   );
-  const handleDelete = (chatId: any) => {
-    mutation.mutate({
-      id: chatId,
-    });
-  };
 
-  // 채팅방 생성 뮤테이션
-  const mutation = useMutation<Chatroom, Error, DeleteChatting>({
-    mutationFn: deleteChattingApi,
-    onSuccess: (data) => {
-      console.log("채팅방 삭제 성공:", data);
-    },
-    onError: (error) => {
-      console.error("채팅방 삭제 실패:", error);
-    },
-  });
   return (
     <>
       <TabsScreenAppBar
@@ -86,7 +89,6 @@ export default function TabTwoScreen() {
         ]}
       />
       <ScrollView style={{ backgroundColor: "#DCD7CB" }}>
-        {/*Tabs Screen App Bar*/}
         <ThemedView
           style={{
             backgroundColor: "#DCD7CB",
@@ -96,21 +98,19 @@ export default function TabTwoScreen() {
             height: "100%",
           }}
         >
-          {/*친구 목록*/}
           {data &&
             data.length > 0 &&
             data.map((chat, index) => {
               if (chat.messages.length < 0) {
                 return null;
               }
-
               const message = chat.messages.pop();
               return (
                 <Swipeable
+                  key={chat.id} // ✅ key를 Swipeable에 직접 부여
                   renderRightActions={() => renderRightActions(chat.id)}
                 >
                   <TouchableOpacity
-                    key={index} // 키 추가
                     style={{
                       display: "flex",
                       flexDirection: "row",
@@ -120,7 +120,7 @@ export default function TabTwoScreen() {
                     onPress={() =>
                       router.push({
                         pathname: "/chattingList/ChatRoom",
-                        params: { chatId: chat.id }, // JSON 문자열로 변환
+                        params: { chatId: chat.id },
                       })
                     }
                   >
@@ -130,7 +130,6 @@ export default function TabTwoScreen() {
                       lastMessage={message?.content!}
                       timestamp={message?.timestamp!}
                       marginBottom={0.05}
-                      key={index}
                     />
                   </TouchableOpacity>
                 </Swipeable>
