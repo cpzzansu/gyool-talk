@@ -5,7 +5,9 @@ export interface CreateChatting {
   friendNickname: string;
   userNickname: string;
 }
-
+export interface DeleteChatting {
+  id: number;
+}
 export interface FindMessage {
   id: number;
 }
@@ -47,5 +49,12 @@ export const fetchChatroomApi = async () => {
 
 export const fetchMessageApi = async (chatId: number): Promise<Message[]> => {
   const response = await api.post(`/chatting/fetchMessage?chatId=${chatId}`);
+  return response.data;
+};
+
+export const deleteChattingApi = async (
+  deleteChatting: DeleteChatting,
+): Promise<Chatroom> => {
+  const response = await api.post("/chatting/deleteChatting", deleteChatting);
   return response.data;
 };

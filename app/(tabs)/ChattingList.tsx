@@ -8,15 +8,17 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-
+import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { ThemedView } from "@/components/ThemedView";
 import TabsScreenAppBar from "@/components/TabsScreenAppBar";
 import { useRouter } from "expo-router";
 import {
   Chatroom,
   fetchChatroomApi,
+  deleteChattingApi,
+  DeleteChatting,
 } from "@/redux/apis/chattingList/chattingListApi";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatTimestamp } from "@/utils/common";
 
 const { width } = Dimensions.get("window");
@@ -27,6 +29,47 @@ export default function TabTwoScreen() {
   });
 
   const router = useRouter();
+  const queryClient = useQueryClient(); // ✅ useQueryClient를 컴포넌트 최상단에서 호출
+
+  // 채팅방 삭제 뮤테이션
+  const mutation = useMutation<Chatroom, Error, DeleteChatting>({
+    mutationFn: deleteChattingApi,
+    onSuccess: (data) => {
+      console.log("채팅방 삭제 성공:", data);
+      queryClient.invalidateQueries(); // ✅ 올바른 방식으로 useQuery를 리페치
+    },
+    onError: (error) => {
+      console.error("채팅방 삭제 실패:", error);
+    },
+  });
+
+  const handleDelete = (chatId: any) => {
+    mutation.mutate({ id: chatId });
+  };
+
+  const renderRightActions = (chatId: any) => (
+    <View
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        width: 80,
+        height: "100%",
+        backgroundColor: "red",
+      }}
+    >
+      <RectButton
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          height: "100%",
+        }}
+        onPress={() => handleDelete(chatId)}
+      >
+        <Text style={{ color: "white", fontWeight: "bold" }}>삭제</Text>
+      </RectButton>
+    </View>
+  );
 
   return (
     <>
@@ -46,7 +89,6 @@ export default function TabTwoScreen() {
         ]}
       />
       <ScrollView style={{ backgroundColor: "#DCD7CB" }}>
-        {/*Tabs Screen App Bar*/}
         <ThemedView
           style={{
             backgroundColor: "#DCD7CB",
@@ -56,40 +98,41 @@ export default function TabTwoScreen() {
             height: "100%",
           }}
         >
-          {/*친구 목록*/}
           {data &&
             data.length > 0 &&
             data.map((chat, index) => {
               if (chat.messages.length < 0) {
                 return null;
               }
-
               const message = chat.messages.pop();
               return (
-                <TouchableOpacity
-                  key={index} // 키 추가
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginBottom: width * 0.05,
-                  }}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/chattingList/ChatRoom",
-                      params: { chatId: chat.id }, // JSON 문자열로 변환
-                    })
-                  }
+                <Swipeable
+                  key={chat.id} // ✅ key를 Swipeable에 직접 부여
+                  renderRightActions={() => renderRightActions(chat.id)}
                 >
-                  <ListItem
-                    chatroomId={chat.id}
-                    chatroomName={chat.chatroomName}
-                    lastMessage={message?.content!}
-                    timestamp={message?.timestamp!}
-                    marginBottom={0.05}
-                    key={index}
-                  />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginBottom: width * 0.05,
+                    }}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/chattingList/ChatRoom",
+                        params: { chatId: chat.id },
+                      })
+                    }
+                  >
+                    <ListItem
+                      chatroomId={chat.id}
+                      chatroomName={chat.chatroomName}
+                      lastMessage={message?.content!}
+                      timestamp={message?.timestamp!}
+                      marginBottom={0.05}
+                    />
+                  </TouchableOpacity>
+                </Swipeable>
               );
             })}
         </ThemedView>
