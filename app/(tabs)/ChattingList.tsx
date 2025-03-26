@@ -19,9 +19,14 @@ import {
   DeleteChatting,
 } from "@/redux/apis/chattingList/chattingListApi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatTimestamp } from "@/utils/common";
+import { formatTimestamp, formatDate } from "@/utils/common";
 
 const { width } = Dimensions.get("window");
+const isToday = (timestamp: string) => {
+  const inputDate = new Date(timestamp).toDateString();
+  const todayDate = new Date().toDateString();
+  return inputDate === todayDate;
+};
 export default function TabTwoScreen() {
   const { data, isLoading, error } = useQuery<Chatroom[]>({
     queryKey: ["chatroom"],
@@ -218,7 +223,9 @@ const ListItem = ({
             textAlign: "right", // 오른쪽 정렬 추가
           }}
         >
-          {formatTimestamp(timestamp)}
+          {isToday(timestamp)
+            ? formatTimestamp(timestamp)
+            : formatDate(timestamp)}
         </Text>
       </View>
     </View>

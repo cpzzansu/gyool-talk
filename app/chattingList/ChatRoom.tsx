@@ -8,17 +8,23 @@ import {
   TouchableOpacity,
   Dimensions,
   Image,
+  Alert,
 } from "react-native";
 import GeneralAppBar from "@/components/GeneralAppBar";
-import { fetchMessageApi } from "@/redux/apis/chattingList/chattingListApi";
+import {
+  fetchMessageApi,
+  uploadAttachmentApi,
+} from "@/redux/apis/chattingList/chattingListApi";
 import { useLocalSearchParams } from "expo-router";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/reducer";
 import { Message } from "@/redux/apis/chattingList/chattingListApi";
 import * as WebSocketUtils from "@/utils/webSocket";
 import { Client } from "@stomp/stompjs";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatTimestamp } from "@/utils/common";
+import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 
 const { width } = Dimensions.get("window");
 
@@ -34,6 +40,8 @@ const ChatRoom = () => {
     ((messageDto: Message) => void) | null
   >(null);
   const flatListRef = useRef<FlatList>(null); // FlatList 참조 추가
+  const [isLoaded, setIsLoaded] = useState(false); // 로딩 완료 상태 추가
+  const [image, setImage] = useState("");
 
   const { data, isLoading, error } = useQuery<Message[]>({
     queryKey: ["chatId", chatId], // chatId를 queryKey에 추가하여, chatId가 바뀌면 새로 데이터를 가져오도록 설정
@@ -49,11 +57,16 @@ const ChatRoom = () => {
   useEffect(() => {
     if (data) {
       setMessages(data);
-      if (data.length > 0) {
-        flatListRef.current?.scrollToEnd({ animated: true }); // 메시지가 업데이트되면 자동으로 마지막 메시지로 스크롤
-      }
+      setIsLoaded(true); // 메시지 로딩 완료
     }
   }, [data]);
+
+  // 메시지 로드 후 자동으로 스크롤
+  useEffect(() => {
+    if (isLoaded && flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true }); // 마지막 메시지로 스크롤
+    }
+  }, [isLoaded, messages]); // 메시지가 업데이트될 때마다 호출
 
   const handleSendMessage = () => {
     if (input.trim() && chatId && sendMessage) {
@@ -89,7 +102,6 @@ const ChatRoom = () => {
         stompClient = await WebSocketUtils.createWebSocketClient(
           chatId,
           (message) => {
-            console.log("받은 메시지:", message);
             setMessages((prev) =>
               prev.some((msg) => msg.id === message.id)
                 ? prev
@@ -115,6 +127,91 @@ const ChatRoom = () => {
       }
     };
   }, [chatId, userId]);
+
+  const handleAttachFile = async () => {
+    console.log("파일 첨부 버튼 클릭됨");
+
+    const file = await DocumentPicker.getDocumentAsync({
+      type: "*/*", // 모든 파일 유형 지원
+    });
+
+    console.log("선택된 파일:", file); // 파일 정보 로그 출력
+
+    if (file.canceled) return;
+
+    const { uri, name } = file.assets[0];
+    const fileType = getFileType(name);
+    console.log("확인 ====> uri: {}, name: {}", uri, name);
+    mutation.mutate({ chatId: chatId, uri, name, fileType });
+  };
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      chatId,
+      uri,
+      name,
+      fileType,
+    }: {
+      chatId: string;
+      uri: string;
+      name: string;
+      fileType: number;
+    }) => {
+      return await uploadAttachmentApi(chatId, uri, name, fileType.toString());
+    },
+    onSuccess: (data: any, variables) => {
+      console.log("업로드 성공:", data);
+
+      const { fileType } = variables; // 업로드 요청 시 전달한 fileType 값
+
+      const messageType =
+        fileType === 2 ? 2 : fileType === 3 ? 3 : fileType === 4 ? 4 : 99;
+
+      const fileMessage: Message = {
+        id: Date.now(),
+        senderId: userId,
+        content: "",
+        messageType: messageType, // 파일 타입에 따른 메시지 타입 설정
+        attachments: [
+          {
+            id: "", // 파일 ID (DB에서 자동 증가하는 시퀀스 값일 수도 있음)
+            fileType: messageType, // 파일 타입 (예: 2는 이미지)
+            filePath: `http://localhost:8080/images/profile/${data}`, // 파일 저장 경로
+          },
+        ],
+        timestamp: Date.now().toString(),
+      };
+
+      setMessages((prevMessages) => [...prevMessages, fileMessage]);
+
+      // WebSocket을 통해 서버로 메시지 전송
+      if (sendMessage) {
+        sendMessage(fileMessage);
+      } else {
+        console.error("sendMessage 함수가 정의되지 않았습니다.");
+      }
+    },
+    onError: (error: any) => {
+      console.error("파일 업로드 실패:", error);
+      Alert.alert("업로드 실패", "파일 업로드 중 오류가 발생했습니다.");
+    },
+  });
+
+  const getFileType = (uri: string): number => {
+    const extension = uri.split(".").pop()?.toLowerCase();
+
+    if (!extension) return 99; // 확장자가 없는 경우 (알 수 없는 타입)
+
+    const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "webp"];
+    const pdfExtensions = ["pdf"];
+    const textExtensions = ["txt"];
+
+    if (imageExtensions.includes(extension)) return 2; // 이미지
+    if (pdfExtensions.includes(extension)) return 3; // PDF
+    if (textExtensions.includes(extension)) return 4; // 텍스트 파일
+
+    return 99; // 기타 파일
+  };
 
   const renderMessage = ({ item }: { item: Message }) => (
     <View
@@ -194,6 +291,14 @@ const ChatRoom = () => {
       />
 
       <View style={styles.inputContainer}>
+        {/* 첨부파일 추가 버튼 */}
+        <TouchableOpacity
+          style={styles.attachButton}
+          onPress={handleAttachFile}
+        >
+          <Text style={styles.attachButtonText}>+</Text>
+        </TouchableOpacity>
+
         <TextInput
           style={styles.input}
           value={input}
@@ -218,7 +323,7 @@ const styles = StyleSheet.create({
   messageContainer: {
     flexDirection: "row",
     alignItems: "flex-end",
-    marginVertical: 5,
+    marginVertical: width * 0.01,
   },
   myMessageContainer: {
     justifyContent: "flex-end",
@@ -235,7 +340,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start", // 왼쪽 정렬
   },
   messageBubble: {
-    padding: 10,
+    padding: width * 0.02,
     borderRadius: 5,
     width: "auto",
     maxWidth: width * 0.6, // 최대 너비는 화면의 70%로 설정
@@ -263,7 +368,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     backgroundColor: "#DCD7CB",
-    padding: 10,
+    padding: width * 0.02,
     justifyContent: "space-between",
   },
   input: {
@@ -271,8 +376,8 @@ const styles = StyleSheet.create({
     width: width * 0.7,
     backgroundColor: "#EFEFEF",
     borderRadius: 5,
-    paddingHorizontal: 10,
-    marginRight: 10,
+    paddingHorizontal: width * 0.02,
+    marginRight: width * 0.02,
   },
   button: {
     backgroundColor: "#F29856",
@@ -299,6 +404,18 @@ const styles = StyleSheet.create({
     marginBottom: width * 0.01,
     fontSize: width * 0.03,
     color: "#848484",
+  },
+  attachButton: {
+    width: width * 0.09,
+    height: width * 0.09,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#DCD7CB",
+  },
+  attachButtonText: {
+    fontSize: width * 0.05,
+    color: "#848484",
+    fontWeight: "bold",
   },
 });
 
